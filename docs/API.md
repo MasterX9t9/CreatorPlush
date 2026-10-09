@@ -62,11 +62,13 @@ The CreatorPulse REST API adheres to modern HTTP/RESTful design principles:
 - `POST /api/v1/workspaces`: Create a new workspace.
 - `GET /api/v1/workspaces/current`: Retrieve active workspace details, plan tier, and usage counters.
 
-### 3.2 YouTube Integration & OAuth (`/api/v1/youtube`)
+### 3.2 YouTube Integration & Channels (`/api/v1/youtube`)
 - `GET /api/v1/youtube/auth-url`: Generate Google OAuth consent URL with YouTube Data and Analytics scopes.
 - `GET /api/v1/youtube/callback`: Process OAuth authorization code, encrypt tokens, sync initial channel profile.
-- `GET /api/v1/youtube/connected-channels`: List authorized channels for active workspace.
-- `DELETE /api/v1/youtube/connected-channels/:id`: Revoke authorization and decouple channel.
+- `GET /api/v1/youtube/connected-channels`: List connected channels for active workspace.
+- `POST /api/v1/youtube/connected-channels`: Connect channel by handle, URL, or ID with real-time video sync.
+- `POST /api/v1/youtube/connected-channels/sync`: Refresh and sync channel metrics, recent uploads, and median views.
+- `DELETE /api/v1/youtube/connected-channels?channelId=:id`: Revoke connection and decouple channel from workspace.
 
 ### 3.3 Search & Discovery (`/api/v1/search`)
 - `GET /api/v1/search/videos`: Search YouTube videos with advanced filters.

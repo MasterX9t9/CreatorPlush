@@ -71,10 +71,14 @@ Status Key:
   - [x] Video search endpoint with duration, date, views filters (`/api/v1/search/videos`)
   - [x] Channel search endpoint (`/api/v1/search/channels`)
   - [x] Search UI with genuine sorting, real pagination, and result cards
-- [x] YouTube Channel Connection & OAuth
+- [x] YouTube Channel Connection & Sync
+  - [x] Instant channel connection by handle, URL, or Channel ID (`POST /api/v1/youtube/connected-channels`)
+  - [x] On-demand channel synchronization (`POST /api/v1/youtube/connected-channels/sync`)
+  - [x] Real-time recent upload sync with median outlier calculation
   - [x] Google OAuth 2.0 flow for YouTube scopes (`/api/v1/youtube/auth-url`, `/api/v1/youtube/callback`)
   - [x] Token encryption at rest (AES-256-GCM)
   - [x] Connected channels management page (`src/app/settings/youtube/page.tsx`)
+  - [x] Creator Overview Dashboard live channel integration (`src/app/page.tsx`)
 
 ---
 
