@@ -19,6 +19,7 @@ import {
   Play,
   Layers,
 } from "lucide-react";
+import { clientFetch } from "@/lib/client-api";
 
 interface OutlierVideo {
   id: string;
@@ -59,7 +60,7 @@ function OutliersContent() {
     setHasQueried(true);
 
     try {
-      const res = await fetch(
+      const res = await clientFetch(
         `/api/v1/outliers?channelId=${encodeURIComponent(
           channelId.trim()
         )}&threshold=${threshold}`

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { calculateChannelSimilarity, ChannelMetrics } from "@/lib/algorithms/similarity";
 
 export async function GET(request: NextRequest) {
@@ -25,8 +25,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const provider = await getEffectiveYouTubeProvider(request);
+
     // 1. Fetch target channel details
-    const target = await youtubeProvider.getChannel(channelId);
+    const target = await provider.getChannel(channelId);
     if (!target) {
       return NextResponse.json(
         {
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Discover candidate peers by querying topic keywords from title & description
     const searchTerms = `${target.title} ${target.description.slice(0, 100)}`;
-    const candidateSearchResult = await youtubeProvider.searchChannels(searchTerms, maxResults + 5);
+    const candidateSearchResult = await provider.searchChannels(searchTerms, maxResults + 5);
 
     // 3. Transform target into ChannelMetrics
     const targetMetrics: ChannelMetrics = {

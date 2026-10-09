@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { analyzeCommentSentiment } from "@/lib/algorithms/sentiment";
 
 export async function GET(
@@ -23,7 +23,8 @@ export async function GET(
   }
 
   try {
-    const commentsData = await youtubeProvider.getVideoComments(videoId, 50);
+    const provider = await getEffectiveYouTubeProvider(request);
+    const commentsData = await provider.getVideoComments(videoId, 50);
 
     if (commentsData.disabled) {
       return NextResponse.json({

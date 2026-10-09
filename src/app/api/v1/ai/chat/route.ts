@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { aiProvider } from "@/lib/providers/ai/ai.provider";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,13 +21,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const ytProvider = await getEffectiveYouTubeProvider(request);
+
     // Step 1: Retrieve genuine data context from YouTube provider if channelId or topicQuery provided
     let groundedVideos: Array<{ id: string; title: string; views: number; outlierMultiplier?: number }> = [];
     let groundedChannels: Array<{ id: string; title: string; views: number; subs: number }> = [];
 
     if (channelId) {
       try {
-        const channelData = await youtubeProvider.getChannel(channelId);
+        const channelData = await ytProvider.getChannel(channelId);
         if (channelData) {
           groundedChannels.push({
             id: channelData.id,
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
             subs: channelData.subscriberCount,
           });
         }
-        const outlierData = await youtubeProvider.getChannelVideosWithOutliers(channelId, 15);
+        const outlierData = await ytProvider.getChannelVideosWithOutliers(channelId, 15);
         groundedVideos = outlierData.videos.map((v) => ({
           id: v.id,
           title: v.title,
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (topicQuery) {
       try {
-        const searchData = await youtubeProvider.searchVideos({ q: topicQuery, maxResults: 10 });
+        const searchData = await ytProvider.searchVideos({ q: topicQuery, maxResults: 10 });
         groundedVideos = searchData.items.map((v) => ({
           id: v.id,
           title: v.title,

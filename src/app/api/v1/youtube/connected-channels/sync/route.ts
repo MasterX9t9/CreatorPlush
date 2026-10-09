@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { channelRepository } from "@/lib/repositories/channel-repository";
 
 export async function POST(request: NextRequest) {
@@ -22,9 +22,10 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanId = channelId.trim();
+    const provider = await getEffectiveYouTubeProvider(request);
 
     // 1. Fetch fresh channel metrics
-    const channel = await youtubeProvider.getChannel(cleanId);
+    const channel = await provider.getChannel(cleanId);
     if (!channel) {
       return NextResponse.json(
         {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
     let medianViews = 0;
     let syncedVideosCount = 0;
     try {
-      const outlierData = await youtubeProvider.getChannelVideosWithOutliers(cleanId, 25);
+      const outlierData = await provider.getChannelVideosWithOutliers(cleanId, 25);
       medianViews = outlierData.channelMedianViews;
       syncedVideosCount = outlierData.videos.length;
     } catch (vidErr) {

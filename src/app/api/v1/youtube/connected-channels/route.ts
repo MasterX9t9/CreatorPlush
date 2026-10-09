@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { channelRepository, ConnectedChannelRecord } from "@/lib/repositories/channel-repository";
 
 export async function GET(request: NextRequest) {
@@ -53,8 +53,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const provider = await getEffectiveYouTubeProvider(request);
+
     // 1. Resolve authentic channel profile using YouTube Data API v3
-    const channel = await youtubeProvider.getChannel(channelInput.trim());
+    const channel = await provider.getChannel(channelInput.trim());
 
     if (!channel) {
       return NextResponse.json(
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
     let medianViews = 0;
     let syncedVideosCount = 0;
     try {
-      const outlierData = await youtubeProvider.getChannelVideosWithOutliers(channel.id, 20);
+      const outlierData = await provider.getChannelVideosWithOutliers(channel.id, 20);
       medianViews = outlierData.channelMedianViews;
       syncedVideosCount = outlierData.videos.length;
     } catch (videoErr) {

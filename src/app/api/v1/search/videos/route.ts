@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 
 export async function GET(request: NextRequest) {
@@ -65,8 +65,10 @@ export async function GET(request: NextRequest) {
   const directVideoId = extractVideoId(q);
 
   try {
+    const provider = await getEffectiveYouTubeProvider(request);
+
     if (directVideoId) {
-      const directVideo = await youtubeProvider.getVideo(directVideoId);
+      const directVideo = await provider.getVideo(directVideoId);
       if (directVideo) {
         return NextResponse.json({
           success: true,
@@ -87,9 +89,9 @@ export async function GET(request: NextRequest) {
       q.trim().startsWith("@");
 
     if (isChannelQuery) {
-      const ch = await youtubeProvider.getChannel(q);
+      const ch = await provider.getChannel(q);
       if (ch) {
-        const { videos } = await youtubeProvider.getChannelVideosWithOutliers(ch.id, maxResults);
+        const { videos } = await provider.getChannelVideosWithOutliers(ch.id, maxResults);
         return NextResponse.json({
           success: true,
           data: videos,
@@ -107,7 +109,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const result = await youtubeProvider.searchVideos({
+    const result = await provider.searchVideos({
       q,
       maxResults,
       pageToken,

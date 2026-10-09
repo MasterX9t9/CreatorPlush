@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { calculateVideoSimilarity, VideoMetrics } from "@/lib/algorithms/similarity";
 
 export async function GET(request: NextRequest) {
@@ -25,8 +25,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const provider = await getEffectiveYouTubeProvider(request);
+
     // 1. Fetch target video details
-    const target = await youtubeProvider.getVideo(videoId);
+    const target = await provider.getVideo(videoId);
     if (!target) {
       return NextResponse.json(
         {
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Discover candidate peers by querying topic keywords from title
     const searchTerms = target.title;
-    const candidateSearchResult = await youtubeProvider.searchVideos({
+    const candidateSearchResult = await provider.searchVideos({
       q: searchTerms,
       maxResults: maxResults + 5,
     });

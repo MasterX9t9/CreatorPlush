@@ -16,6 +16,7 @@ import {
   Users,
   AlertCircle,
 } from "lucide-react";
+import { clientFetch } from "@/lib/client-api";
 
 interface CompetitorChannel {
   id: string;
@@ -45,7 +46,7 @@ export default function CompetitorsPage() {
 
     try {
       // Query channel metadata from YouTube API
-      const res = await fetch(`/api/v1/channels/${encodeURIComponent(channelInput.trim())}`);
+      const res = await clientFetch(`/api/v1/channels/${encodeURIComponent(channelInput.trim())}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {

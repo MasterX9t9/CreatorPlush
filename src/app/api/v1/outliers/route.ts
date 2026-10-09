@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await youtubeProvider.getChannelVideosWithOutliers(channelId, 30);
+    const provider = await getEffectiveYouTubeProvider(request);
+    const result = await provider.getChannelVideosWithOutliers(channelId, 30);
 
     // Filter by requested threshold if requested
     let filteredVideos = result.videos;

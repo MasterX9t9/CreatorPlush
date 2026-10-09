@@ -31,6 +31,7 @@ import {
   BarChart3,
   CheckCircle2,
 } from "lucide-react";
+import { clientFetch } from "@/lib/client-api";
 
 interface ConnectedChannel {
   id: string;
@@ -80,7 +81,7 @@ export function DashboardView() {
   const fetchConnectedChannels = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/v1/youtube/connected-channels");
+      const res = await clientFetch("/api/v1/youtube/connected-channels");
       const json = await res.json();
       if (res.ok && json.success && Array.isArray(json.data)) {
         setConnectedChannels(json.data);
@@ -114,7 +115,7 @@ export function DashboardView() {
     const fetchVideos = async () => {
       setIsLoadingVideos(true);
       try {
-        const res = await fetch(
+        const res = await clientFetch(
           `/api/v1/channels/${encodeURIComponent(activeChannel.id)}/analytics`
         );
         const json = await res.json();

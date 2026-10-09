@@ -8,6 +8,7 @@ import { AttributionBadge } from "@/components/ui/AttributionBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatCompactNumber } from "@/lib/utils";
 import { estimateRevenueRange } from "@/lib/algorithms/revenue";
+import { clientFetch } from "@/lib/client-api";
 import {
   Video,
   Search,
@@ -186,7 +187,7 @@ function VideoAnalyticsContent() {
       }
 
       // Query full video intelligence route
-      const res = await fetch(`/api/v1/videos/${targetId}`);
+      const res = await clientFetch(`/api/v1/videos/${targetId}`);
       const json = await res.json();
 
       if (!res.ok || !json.success || !json.data) {
@@ -208,7 +209,7 @@ function VideoAnalyticsContent() {
     setSentimentLoading(true);
     setSentimentError(null);
     try {
-      const res = await fetch(`/api/v1/videos/${videoId}/comments/sentiment`);
+      const res = await clientFetch(`/api/v1/videos/${videoId}/comments/sentiment`);
       const json = await res.json();
       if (json.success && json.data) {
         setSentimentData(json.data);

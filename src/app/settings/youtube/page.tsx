@@ -23,6 +23,7 @@ import {
   ArrowRight,
   Info,
 } from "lucide-react";
+import { clientFetch } from "@/lib/client-api";
 
 interface ConnectedChannel {
   id: string;
@@ -63,7 +64,7 @@ function YouTubeSettingsContent() {
   const fetchChannels = async () => {
     setIsLoadingChannels(true);
     try {
-      const res = await fetch("/api/v1/youtube/connected-channels");
+      const res = await clientFetch("/api/v1/youtube/connected-channels");
       const json = await res.json();
       if (res.ok && json.success) {
         setConnectedChannels(json.data || []);
@@ -88,7 +89,7 @@ function YouTubeSettingsContent() {
     setManualSuccess(null);
 
     try {
-      const res = await fetch("/api/v1/youtube/connected-channels", {
+      const res = await clientFetch("/api/v1/youtube/connected-channels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ channelInput: channelInput.trim() }),
@@ -121,7 +122,7 @@ function YouTubeSettingsContent() {
     setSyncedId(null);
 
     try {
-      const res = await fetch("/api/v1/youtube/connected-channels/sync", {
+      const res = await clientFetch("/api/v1/youtube/connected-channels/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ channelId }),

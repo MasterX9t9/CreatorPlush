@@ -19,6 +19,7 @@ import {
   Play,
 } from "lucide-react";
 import Image from "next/image";
+import { clientFetch } from "@/lib/client-api";
 
 interface SearchResultItem {
   id: string;
@@ -70,7 +71,7 @@ export default function YouTubeSearchPage() {
         maxResults: "24",
       });
 
-      const res = await fetch(`/api/v1/search/videos?${params.toString()}`);
+      const res = await clientFetch(`/api/v1/search/videos?${params.toString()}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const searchRes = await youtubeProvider.searchVideos({
+    const provider = await getEffectiveYouTubeProvider(request);
+    const searchRes = await provider.searchVideos({
       q: q.trim(),
       maxResults: 20,
     });

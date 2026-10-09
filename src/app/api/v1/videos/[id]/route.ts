@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { analyzePublishTiming, analyzeTagIntelligence } from "@/lib/algorithms/timing";
 
 export async function GET(
@@ -30,7 +30,8 @@ export async function GET(
   }
 
   try {
-    const video = await youtubeProvider.getVideo(videoId);
+    const provider = await getEffectiveYouTubeProvider(request);
+    const video = await provider.getVideo(videoId);
 
     if (!video) {
       return NextResponse.json(

@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ChannelSimilarityResult } from "@/lib/algorithms/similarity";
+import { clientFetch } from "@/lib/client-api";
 
 interface ChannelDetails {
   id: string;
@@ -52,7 +53,7 @@ function CompareContent() {
 
     // 1. Direct channel resolution supporting handles, normal URLs, video links, and IDs
     try {
-      const res = await fetch(`/api/v1/channels/${encodeURIComponent(query.trim())}`);
+      const res = await clientFetch(`/api/v1/channels/${encodeURIComponent(query.trim())}`);
       const json = await res.json();
       if (json.success && json.data) {
         return json.data;
@@ -63,7 +64,7 @@ function CompareContent() {
 
     // 2. Search fallback by channel name
     try {
-      const searchRes = await fetch(
+      const searchRes = await clientFetch(
         `/api/v1/search/channels?q=${encodeURIComponent(query.trim())}&maxResults=1`
       );
       const searchJson = await searchRes.json();

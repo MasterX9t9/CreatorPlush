@@ -20,6 +20,7 @@ import {
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
+import { clientFetch } from "@/lib/client-api";
 
 interface KeywordData {
   keyword: string;
@@ -55,7 +56,7 @@ function KeywordResearchContent() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/v1/keywords/research?q=${encodeURIComponent(term.trim())}`);
+      const res = await clientFetch(`/api/v1/keywords/research?q=${encodeURIComponent(term.trim())}`);
       const json = await res.json();
 
       if (!res.ok || !json.success) {

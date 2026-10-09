@@ -38,8 +38,10 @@ import {
   Coins,
   Lock,
   Clock,
+  KeyRound,
 } from "lucide-react";
 import { MonetizationAssessment } from "@/lib/algorithms/monetization";
+import { clientFetch } from "@/lib/client-api";
 
 interface AnalyticsData {
   channel: {
@@ -116,6 +118,11 @@ function ChannelAnalyticsContent() {
   const [swipeSaved, setSwipeSaved] = useState(false);
   const [swipeError, setSwipeError] = useState<string | null>(null);
 
+  // Quick API Key state
+  const [quickApiKey, setQuickApiKey] = useState("");
+  const [isSavingKey, setIsSavingKey] = useState(false);
+  const [keySaveMsg, setKeySaveMsg] = useState<string | null>(null);
+
   const fetchAnalytics = async (inputStr: string) => {
     if (!inputStr.trim()) return;
     setIsLoading(true);
@@ -124,7 +131,7 @@ function ChannelAnalyticsContent() {
     setSwipeError(null);
 
     try {
-      const res = await fetch(`/api/v1/channels/${encodeURIComponent(inputStr.trim())}/analytics`);
+      const res = await clientFetch(`/api/v1/channels/${encodeURIComponent(inputStr.trim())}/analytics`);
       const json = await res.json();
 
       if (!res.ok || !json.success || !json.data) {
@@ -138,6 +145,33 @@ function ChannelAnalyticsContent() {
       setData(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveQuickKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickApiKey.trim()) return;
+    setIsSavingKey(true);
+    setKeySaveMsg(null);
+    try {
+      const cleanKey = quickApiKey.trim();
+      if (typeof window !== "undefined") {
+        localStorage.setItem("cp_user_youtube_key", cleanKey);
+      }
+      await clientFetch("/api/v1/user/keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: "youtube", key: cleanKey }),
+      });
+      setKeySaveMsg("✓ Key activated! Re-analyzing channel now...");
+      setError(null);
+      setTimeout(() => {
+        fetchAnalytics(channelInput || initialId || "https://www.youtube.com/@RecapManhwaMovie");
+      }, 400);
+    } catch (err: any) {
+      setKeySaveMsg(err?.message || "Failed to activate key.");
+    } finally {
+      setIsSavingKey(false);
     }
   };
 
@@ -268,9 +302,53 @@ function ChannelAnalyticsContent() {
 
       {/* Error Banner */}
       {error && (
-        <div className="glass-panel p-4 rounded-xl border border-rose-500/30 bg-rose-950/20 text-rose-300 text-xs flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
-          <span>{error}</span>
+        <div className="glass-panel p-5 rounded-xl border border-rose-500/30 bg-rose-950/20 text-rose-300 text-xs space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-1">
+              <div className="font-semibold text-rose-200">{error}</div>
+              {error.toLowerCase().includes("api key") && (
+                <div className="text-muted-foreground text-[11px] leading-relaxed">
+                  CreatorPulse needs a Google Cloud YouTube Data API v3 key to query live YouTube statistics. You can configure it permanently in Settings, or paste it directly below to activate it instantly.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {error.toLowerCase().includes("api key") && (
+            <div className="pt-2 border-t border-rose-500/20 space-y-2">
+              <form onSubmit={handleSaveQuickKey} className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1">
+                  <KeyRound className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={quickApiKey}
+                    onChange={(e) => setQuickApiKey(e.target.value)}
+                    placeholder="Paste YouTube API Key (AIzaSy...)"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-card border border-white/10 text-foreground placeholder:text-muted-foreground text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSavingKey || !quickApiKey.trim()}
+                  className="px-4 py-2 rounded-lg bg-primary hover:bg-pulse-600 disabled:opacity-50 text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  {isSavingKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
+                  <span>{isSavingKey ? "Activating..." : "Save & Analyze"}</span>
+                </button>
+                <Link
+                  href="/settings/api-keys"
+                  className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open Settings &gt; API Keys</span>
+                </Link>
+              </form>
+              {keySaveMsg && (
+                <p className="text-[11px] text-emerald-400 font-medium">{keySaveMsg}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
