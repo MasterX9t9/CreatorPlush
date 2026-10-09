@@ -81,12 +81,13 @@ The CreatorPulse REST API adheres to modern HTTP/RESTful design principles:
 - `GET /api/v1/channels/:id`: Get channel overview (subscribers, views, upload count, banner, avatar). Accepts handles (`@handle`), channel URLs, video URLs (`watch?v=...`), and channel IDs.
 - `GET /api/v1/channels/:id/analytics`: Comprehensive analytics with official vs calculated breakdown:
   - Universal URL & handle resolution
+  - YouTube Partner Program (YPP) Monetization Evaluation (`isMonetized`, `status`, criteria breakdown: 1K subscribers, 4K public watch hours, 3 uploads, and active revenue streams)
   - Median & average views
   - Shorts vs Long-form performance comparison & dominance ratio
   - Publishing consistency & upload cadence (weekly velocity)
   - Subscriber reach ratio & viral algorithmic discovery
   - Top recurring focus keywords & dominant category
-  - Estimated RPM and monthly revenue range
+  - Estimated RPM and monthly/annual revenue ranges
 - `GET /api/v1/channels/:id/videos`: Paginated list of videos for the channel with outlier metrics.
 
 ### 3.5 Video Analytics (`/api/v1/videos`)

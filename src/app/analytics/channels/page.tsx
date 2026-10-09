@@ -32,7 +32,14 @@ import {
   ArrowRight,
   Info,
   Tv,
+  XCircle,
+  ShieldCheck,
+  AlertTriangle,
+  Coins,
+  Lock,
+  Clock,
 } from "lucide-react";
+import { MonetizationAssessment } from "@/lib/algorithms/monetization";
 
 interface AnalyticsData {
   channel: {
@@ -48,6 +55,7 @@ interface AnalyticsData {
     publishedAt?: string;
     country?: string;
   };
+  monetization?: MonetizationAssessment;
   medianViews: number;
   averageViews: number;
   sampleVideoCount: number;
@@ -196,30 +204,67 @@ function ChannelAnalyticsContent() {
   return (
     <div className="space-y-6">
       {/* Search Input Bar - Supports normal links, @handles, video links, and channel IDs */}
-      <form onSubmit={handleSubmit} className="flex gap-3">
-        <div className="relative flex-1">
-          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={channelInput}
-            onChange={(e) => setChannelInput(e.target.value)}
-            placeholder="Paste any YouTube Channel URL (e.g. 'youtube.com/@handle'), Handle, Video link, or Channel ID..."
-            className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm shadow-sm font-mono"
-          />
+      <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={channelInput}
+              onChange={(e) => setChannelInput(e.target.value)}
+              placeholder="Paste any YouTube Channel URL (e.g. 'youtube.com/@handle'), Handle, Video link, or Channel ID..."
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm shadow-sm font-mono"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading || !channelInput.trim()}
+            className="px-6 py-3 rounded-xl bg-primary hover:bg-pulse-600 disabled:opacity-50 text-white font-semibold text-sm transition-all shadow-md flex items-center gap-2 shrink-0"
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <BarChart3 className="w-4 h-4" />
+            )}
+            <span>{isLoading ? "Analyzing..." : "Analyze Channel"}</span>
+          </button>
+        </form>
+
+        {/* Quick Sample Presets */}
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground px-1">
+          <span className="font-medium text-[11px]">Instant Examples:</span>
+          <button
+            type="button"
+            onClick={() => {
+              setChannelInput("https://www.youtube.com/@LegendMangaReels");
+              fetchAnalytics("https://www.youtube.com/@LegendMangaReels");
+            }}
+            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-foreground text-[11px] font-medium transition-colors"
+          >
+            @LegendMangaReels
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setChannelInput("https://www.youtube.com/@mkbhd");
+              fetchAnalytics("https://www.youtube.com/@mkbhd");
+            }}
+            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-foreground text-[11px] font-medium transition-colors"
+          >
+            @mkbhd
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setChannelInput("https://www.youtube.com/@veritasium");
+              fetchAnalytics("https://www.youtube.com/@veritasium");
+            }}
+            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-foreground text-[11px] font-medium transition-colors"
+          >
+            @veritasium
+          </button>
         </div>
-        <button
-          type="submit"
-          disabled={isLoading || !channelInput.trim()}
-          className="px-6 py-3 rounded-xl bg-primary hover:bg-pulse-600 disabled:opacity-50 text-white font-semibold text-sm transition-all shadow-md flex items-center gap-2 shrink-0"
-        >
-          {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <BarChart3 className="w-4 h-4" />
-          )}
-          <span>{isLoading ? "Analyzing..." : "Analyze Channel"}</span>
-        </button>
-      </form>
+      </div>
 
       {/* Error Banner */}
       {error && (
@@ -286,6 +331,22 @@ function ChannelAnalyticsContent() {
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase">
                       {data.dominantCategory}
                     </span>
+                    {data.monetization && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border shadow-sm ${
+                          data.monetization.isMonetized
+                            ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                            : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                        }`}
+                      >
+                        {data.monetization.isMonetized ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <XCircle className="w-3.5 h-3.5 text-amber-400" />
+                        )}
+                        <span>{data.monetization.isMonetized ? "Monetized" : "Not Monetized"}</span>
+                      </span>
+                    )}
                     <AttributionBadge type="official" sourceText="YouTube Data API v3" />
                   </div>
 
@@ -355,6 +416,375 @@ function ChannelAnalyticsContent() {
               <div className="px-6 pb-4 text-[11px] text-rose-400">{swipeError}</div>
             )}
           </div>
+
+          {/* Dedicated YouTube Partner Program (YPP) Monetization Intelligence Card */}
+          {data.monetization && (
+            <div
+              className={`glass-panel p-6 rounded-2xl border transition-all space-y-6 ${
+                data.monetization.isMonetized
+                  ? "border-emerald-500/30 bg-gradient-to-br from-emerald-950/25 via-card to-card shadow-[0_0_30px_rgba(16,185,129,0.06)]"
+                  : "border-amber-500/30 bg-gradient-to-br from-amber-950/20 via-card to-card shadow-[0_0_30px_rgba(245,158,11,0.05)]"
+              }`}
+            >
+              {/* Header Status Bar */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
+                <div className="flex items-start gap-3.5">
+                  <div
+                    className={`p-3 rounded-2xl shrink-0 mt-0.5 ${
+                      data.monetization.isMonetized
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                    }`}
+                  >
+                    {data.monetization.isMonetized ? (
+                      <ShieldCheck className="w-6 h-6" />
+                    ) : (
+                      <AlertTriangle className="w-6 h-6" />
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                          data.monetization.isMonetized
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        }`}
+                      >
+                        {data.monetization.statusLabel}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-mono">
+                        YPP Confidence: {(data.monetization.confidence * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <h3 className="text-base font-bold text-foreground">
+                      {data.monetization.summary}
+                    </h3>
+                    <p className="text-xs text-muted-foreground max-w-2xl">
+                      {data.monetization.methodology}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Revenue Estimation Highlight */}
+                <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 shrink-0">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
+                      AdSense Earning Bracket
+                    </span>
+                    <div className="text-base font-extrabold text-foreground flex items-center gap-1 mt-0.5">
+                      <DollarSign className="w-4 h-4 text-emerald-400 -mr-0.5" />
+                      <span>
+                        {data.monetization.isMonetized
+                          ? `$${data.revenueEstimate.monthlyRevenueMin.toLocaleString()} – $${data.revenueEstimate.monthlyRevenueMax.toLocaleString()} / mo`
+                          : "$0 / month (Not Monetized)"}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {data.monetization.isMonetized
+                        ? `Est. Annual: $${data.monetization.annualEstimate.min.toLocaleString()} – $${data.monetization.annualEstimate.max.toLocaleString()}`
+                        : "Unlocks at 1K subs & 4K watch hours"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* YPP Qualification Thresholds Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Subscribers Requirement */}
+                <div className="p-4 rounded-xl bg-black/30 border border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-primary" />
+                      <span>Subscribers (1,000 req.)</span>
+                    </span>
+                    <span
+                      className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                        data.monetization.criteria.subscribers.passed
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                      }`}
+                    >
+                      {data.monetization.criteria.subscribers.passed
+                        ? "Passed ✓"
+                        : `${data.monetization.criteria.subscribers.progressPct}%`}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-xs font-mono">
+                    <span className="text-foreground font-bold text-sm">
+                      {data.monetization.criteria.subscribers.current.toLocaleString()}
+                    </span>
+                    <span className="text-muted-foreground">/ 1,000 threshold</span>
+                  </div>
+                  {/* Progress Bar */}
+                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        data.monetization.criteria.subscribers.passed
+                          ? "bg-emerald-500"
+                          : "bg-amber-500"
+                      }`}
+                      style={{
+                        width: `${data.monetization.criteria.subscribers.progressPct}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {data.monetization.criteria.subscribers.passed
+                      ? "Exceeds official Partner requirement"
+                      : `Needs ${(
+                          1000 - data.monetization.criteria.subscribers.current
+                        ).toLocaleString()} more subscribers`}
+                  </p>
+                </div>
+
+                {/* Watch Hours Requirement */}
+                <div className="p-4 rounded-xl bg-black/30 border border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Watch Hours (4,000 req.)</span>
+                    </span>
+                    <span
+                      className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                        data.monetization.criteria.estimatedWatchHours.passed
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                      }`}
+                    >
+                      {data.monetization.criteria.estimatedWatchHours.passed
+                        ? "Passed ✓"
+                        : `${data.monetization.criteria.estimatedWatchHours.progressPct}%`}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-xs font-mono">
+                    <span className="text-foreground font-bold text-sm">
+                      ~{formatCompactNumber(
+                        data.monetization.criteria.estimatedWatchHours.estimatedCurrent
+                      )}{" "}
+                      hrs
+                    </span>
+                    <span className="text-muted-foreground">/ 4,000 hrs</span>
+                  </div>
+                  {/* Progress Bar */}
+                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        data.monetization.criteria.estimatedWatchHours.passed
+                          ? "bg-emerald-500"
+                          : "bg-amber-500"
+                      }`}
+                      style={{
+                        width: `${data.monetization.criteria.estimatedWatchHours.progressPct}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {data.monetization.criteria.estimatedWatchHours.passed
+                      ? "Exceeds 4,000 public watch hours baseline"
+                      : "Approaching valid public watch hours threshold"}
+                  </p>
+                </div>
+
+                {/* Minimum Uploads Requirement */}
+                <div className="p-4 rounded-xl bg-black/30 border border-white/10 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Film className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Active Uploads (3 min.)</span>
+                    </span>
+                    <span
+                      className={`font-bold px-2 py-0.5 rounded text-[11px] ${
+                        data.monetization.criteria.minimumUploads.passed
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                      }`}
+                    >
+                      {data.monetization.criteria.minimumUploads.passed
+                        ? "Passed ✓"
+                        : "Needs Uploads"}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-xs font-mono">
+                    <span className="text-foreground font-bold text-sm">
+                      {data.monetization.criteria.minimumUploads.current} uploads
+                    </span>
+                    <span className="text-muted-foreground">/ 3 minimum</span>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        data.monetization.criteria.minimumUploads.passed
+                          ? "bg-emerald-500"
+                          : "bg-rose-500"
+                      }`}
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            (data.monetization.criteria.minimumUploads.current / 3) * 100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    {data.monetization.criteria.minimumUploads.passed
+                      ? "Public video catalog is established"
+                      : "Requires at least 3 public videos to apply"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Revenue Streams Breakdown */}
+              <div className="space-y-3 pt-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                  Active Monetization Streams & Features
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {/* Stream 1: In-Stream Ads */}
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <DollarSign
+                        className={`w-4 h-4 ${
+                          data.monetization.revenueStreams.inStreamAds
+                            ? "text-emerald-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">
+                          In-Stream Video Ads
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Pre/Mid/Post-Roll
+                        </div>
+                      </div>
+                    </div>
+                    {data.monetization.revenueStreams.inStreamAds ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> Locked
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stream 2: Shorts Feed Ads */}
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Film
+                        className={`w-4 h-4 ${
+                          data.monetization.revenueStreams.shortsFeedAds
+                            ? "text-emerald-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">
+                          Shorts Feed Ads
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Shorts Ad Pool
+                        </div>
+                      </div>
+                    </div>
+                    {data.monetization.revenueStreams.shortsFeedAds ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        Active
+                      </span>
+                    ) : data.monetization.isMonetized ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground">
+                        Inactive
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> Locked
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stream 3: Channel Memberships */}
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Coins
+                        className={`w-4 h-4 ${
+                          data.monetization.revenueStreams.channelMemberships
+                            ? "text-emerald-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">
+                          Memberships
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Monthly Badges & Perks
+                        </div>
+                      </div>
+                    </div>
+                    {data.monetization.revenueStreams.channelMemberships ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        Eligible
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> Locked
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stream 4: Super Thanks & Super Chats */}
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles
+                        className={`w-4 h-4 ${
+                          data.monetization.revenueStreams.fanFundingSuperThanks
+                            ? "text-emerald-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                      <div>
+                        <div className="text-xs font-semibold text-foreground">
+                          Super Thanks
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Fan Tips & Chats
+                        </div>
+                      </div>
+                    </div>
+                    {data.monetization.revenueStreams.fanFundingSuperThanks ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                        Eligible
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-muted-foreground flex items-center gap-1">
+                        <Lock className="w-2.5 h-2.5" /> Locked
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Attribution & Transparency Disclaimer */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 text-[11px] text-muted-foreground border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <AttributionBadge
+                      type="calculated"
+                      sourceText="YouTube Partner Program Qualification Model"
+                    />
+                    <span>
+                      Attribution: Evaluated based on official YouTube Partner Program qualification criteria
+                    </span>
+                  </div>
+                  <span className="italic">
+                    RPM benchmark: ${data.revenueEstimate.rpmMin}–${data.revenueEstimate.rpmMax} USD ({data.dominantCategory})
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Primary Metric Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -455,10 +885,14 @@ function ChannelAnalyticsContent() {
                 <DollarSign className="w-3.5 h-3.5 text-amber-400" />
               </span>
               <p className="text-base font-bold text-foreground">
-                ${data.revenueEstimate.monthlyRevenueMin} – ${data.revenueEstimate.monthlyRevenueMax}
+                {data.monetization?.isMonetized
+                  ? `$${data.revenueEstimate.monthlyRevenueMin.toLocaleString()} – $${data.revenueEstimate.monthlyRevenueMax.toLocaleString()}`
+                  : "$0 (Not Monetized)"}
               </p>
               <p className="text-[11px] text-muted-foreground">
-                RPM benchmark: ${data.revenueEstimate.rpmMin} – ${data.revenueEstimate.rpmMax}
+                {data.monetization?.isMonetized
+                  ? `RPM benchmark: $${data.revenueEstimate.rpmMin} – $${data.revenueEstimate.rpmMax}`
+                  : "Requires 1K subs & 4K watch hrs"}
               </p>
             </div>
           </div>

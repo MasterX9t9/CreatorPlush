@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { estimateRevenueRange } from "@/lib/algorithms/revenue";
+import { evaluateChannelMonetization } from "@/lib/algorithms/monetization";
 
 export async function GET(
   request: NextRequest,
@@ -108,7 +109,21 @@ export async function GET(
 
     // Monthly revenue estimation based on velocity
     const estimatedMonthlyViews = Math.max(avgViews * (uploadsPerWeek > 0 ? uploadsPerWeek * 4 : 4), 1000);
-    const revenueEstimate = estimateRevenueRange(estimatedMonthlyViews, "default");
+    const revenueEstimate = estimateRevenueRange(estimatedMonthlyViews, dominantCategory);
+
+    // YouTube Partner Program Monetization Evaluation
+    const monetization = evaluateChannelMonetization({
+      subscriberCount: channel.subscriberCount,
+      viewCount: channel.viewCount,
+      videoCount: channel.videoCount,
+      recentVideosSample: videos.map((v) => ({
+        viewCount: v.viewCount,
+        durationSec: v.durationSec || 0,
+        isShort: v.isShort,
+      })),
+      monthlyRevenueMin: revenueEstimate.monthlyRevenueMin,
+      monthlyRevenueMax: revenueEstimate.monthlyRevenueMax,
+    });
 
     // Top videos sorted by view count
     const topVideos = [...videos].sort((a, b) => b.viewCount - a.viewCount).slice(0, 6);
@@ -117,6 +132,7 @@ export async function GET(
       success: true,
       data: {
         channel,
+        monetization,
         medianViews: channelMedianViews,
         averageViews: avgViews,
         sampleVideoCount: videos.length,
