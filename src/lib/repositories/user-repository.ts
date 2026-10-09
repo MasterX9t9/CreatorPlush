@@ -65,6 +65,17 @@ function writeLocalStore(data: LocalStoreData): void {
   }
 }
 
+let lastDbFailure = 0;
+const DB_RETRY_INTERVAL = 15000;
+
+function isDbTemporarilyDown(): boolean {
+  return Date.now() - lastDbFailure < DB_RETRY_INTERVAL;
+}
+
+function markDbFailed(): void {
+  lastDbFailure = Date.now();
+}
+
 export class UserRepository {
   /**
    * Finds a user by email, checking PostgreSQL first, then local fallback store
@@ -72,24 +83,26 @@ export class UserRepository {
   async findByEmail(email: string): Promise<UserRecord | null> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // 1. Try PostgreSQL via Prisma
-    try {
-      const user = await prisma.user.findUnique({
-        where: { email: normalizedEmail },
-      });
-      if (user && user.passwordHash) {
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name || user.email.split("@")[0],
-          passwordHash: user.passwordHash,
-          avatarUrl: user.avatarUrl || undefined,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
-        };
+    // 1. Try PostgreSQL via Prisma if database is reachable
+    if (!isDbTemporarilyDown()) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+        });
+        if (user && user.passwordHash) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name || user.email.split("@")[0],
+            passwordHash: user.passwordHash,
+            avatarUrl: user.avatarUrl || undefined,
+            createdAt: user.createdAt.toISOString(),
+            updatedAt: user.updatedAt.toISOString(),
+          };
+        }
+      } catch {
+        markDbFailed();
       }
-    } catch {
-      // Prisma / PostgreSQL offline, fall through to local fallback
     }
 
     // 2. Local fallback store
@@ -104,24 +117,26 @@ export class UserRepository {
    * Finds a user by ID
    */
   async findById(id: string): Promise<UserRecord | null> {
-    // 1. Try PostgreSQL
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-      });
-      if (user && user.passwordHash) {
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name || user.email.split("@")[0],
-          passwordHash: user.passwordHash,
-          avatarUrl: user.avatarUrl || undefined,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
-        };
+    // 1. Try PostgreSQL if DB is available
+    if (!isDbTemporarilyDown()) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id },
+        });
+        if (user && user.passwordHash) {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name || user.email.split("@")[0],
+            passwordHash: user.passwordHash,
+            avatarUrl: user.avatarUrl || undefined,
+            createdAt: user.createdAt.toISOString(),
+            updatedAt: user.updatedAt.toISOString(),
+          };
+        }
+      } catch {
+        markDbFailed();
       }
-    } catch {
-      // fallback
     }
 
     // 2. Local fallback
@@ -133,42 +148,44 @@ export class UserRepository {
    * Retrieves user profile along with primary workspace details
    */
   async getUserWithWorkspace(userId: string): Promise<UserWithWorkspace | null> {
-    // 1. Try PostgreSQL
-    try {
-      const member = await prisma.teamMember.findFirst({
-        where: { userId },
-        include: {
-          user: true,
-          workspace: {
-            include: {
-              subscription: true,
+    // 1. Try PostgreSQL if DB is available
+    if (!isDbTemporarilyDown()) {
+      try {
+        const member = await prisma.teamMember.findFirst({
+          where: { userId },
+          include: {
+            user: true,
+            workspace: {
+              include: {
+                subscription: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (member && member.user && member.workspace) {
-        return {
-          user: {
-            id: member.user.id,
-            email: member.user.email,
-            name: member.user.name || member.user.email.split("@")[0],
-            passwordHash: member.user.passwordHash || "",
-            avatarUrl: member.user.avatarUrl || undefined,
-            createdAt: member.user.createdAt.toISOString(),
-            updatedAt: member.user.updatedAt.toISOString(),
-          },
-          workspace: {
-            id: member.workspace.id,
-            name: member.workspace.name,
-            slug: member.workspace.slug,
-            role: member.role as any,
-            planTier: (member.workspace.subscription?.tier as any) || "FREE",
-          },
-        };
+        if (member && member.user && member.workspace) {
+          return {
+            user: {
+              id: member.user.id,
+              email: member.user.email,
+              name: member.user.name || member.user.email.split("@")[0],
+              passwordHash: member.user.passwordHash || "",
+              avatarUrl: member.user.avatarUrl || undefined,
+              createdAt: member.user.createdAt.toISOString(),
+              updatedAt: member.user.updatedAt.toISOString(),
+            },
+            workspace: {
+              id: member.workspace.id,
+              name: member.workspace.name,
+              slug: member.workspace.slug,
+              role: member.role as any,
+              planTier: (member.workspace.subscription?.tier as any) || "FREE",
+            },
+          };
+        }
+      } catch {
+        markDbFailed();
       }
-    } catch {
-      // fallback
     }
 
     // 2. Local fallback
@@ -216,63 +233,67 @@ export class UserRepository {
     const workspaceSlug = `${userSlug}-${crypto.randomBytes(3).toString("hex")}`;
     const workspaceName = `${displayName}'s Workspace`;
 
-    // 1. Try PostgreSQL
-    try {
-      const result = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email: normalizedEmail,
-            name: displayName,
-            passwordHash,
-          },
-        });
+    // 1. Try PostgreSQL if DB is available
+    if (!isDbTemporarilyDown()) {
+      try {
+        const result = await prisma.$transaction(async (tx) => {
+          const user = await tx.user.create({
+            data: {
+              email: normalizedEmail,
+              name: displayName,
+              passwordHash,
+            },
+          });
 
-        const workspace = await tx.workspace.create({
-          data: {
-            name: workspaceName,
-            slug: workspaceSlug,
-            subscription: {
-              create: {
-                tier: "FREE",
-                currentPeriodEnd: new Date(Date.now() + 365 * 24 * 3600 * 1000),
+          const workspace = await tx.workspace.create({
+            data: {
+              name: workspaceName,
+              slug: workspaceSlug,
+              subscription: {
+                create: {
+                  tier: "FREE",
+                  currentPeriodEnd: new Date(Date.now() + 365 * 24 * 3600 * 1000),
+                },
+              },
+              members: {
+                create: {
+                  userId: user.id,
+                  role: "OWNER",
+                },
               },
             },
-            members: {
-              create: {
-                userId: user.id,
-                role: "OWNER",
-              },
+            include: {
+              subscription: true,
             },
-          },
-          include: {
-            subscription: true,
-          },
+          });
+
+          return { user, workspace };
         });
 
-        return { user, workspace };
-      });
+        return {
+          user: {
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name || displayName,
+            passwordHash: result.user.passwordHash || "",
+            createdAt: result.user.createdAt.toISOString(),
+            updatedAt: result.user.updatedAt.toISOString(),
+          },
+          workspace: {
+            id: result.workspace.id,
+            name: result.workspace.name,
+            slug: result.workspace.slug,
+            role: "OWNER",
+            planTier: (result.workspace.subscription?.tier as any) || "FREE",
+          },
+        };
+      } catch {
+        markDbFailed();
+      }
+    }
 
-      return {
-        user: {
-          id: result.user.id,
-          email: result.user.email,
-          name: result.user.name || displayName,
-          passwordHash: result.user.passwordHash || passwordHash,
-          avatarUrl: result.user.avatarUrl || undefined,
-          createdAt: result.user.createdAt.toISOString(),
-          updatedAt: result.user.updatedAt.toISOString(),
-        },
-        workspace: {
-          id: result.workspace.id,
-          name: result.workspace.name,
-          slug: result.workspace.slug,
-          role: "OWNER",
-          planTier: (result.workspace.subscription?.tier as any) || "FREE",
-        },
-      };
-    } catch {
-      // 2. Local fallback
-      const userId = `usr_${crypto.randomBytes(8).toString("hex")}`;
+    // 2. Local fallback
+    const userId = `usr_${crypto.randomBytes(8).toString("hex")}`;
       const workspaceId = `ws_${crypto.randomBytes(8).toString("hex")}`;
       const now = new Date().toISOString();
 
@@ -305,7 +326,6 @@ export class UserRepository {
         user: userRecord,
         workspace: workspaceRecord,
       };
-    }
   }
 }
 

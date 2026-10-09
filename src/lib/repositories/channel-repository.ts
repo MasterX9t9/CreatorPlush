@@ -42,45 +42,58 @@ function writeLocalChannels(channels: ConnectedChannelRecord[]): void {
   }
 }
 
+let lastDbFailure = 0;
+const DB_RETRY_INTERVAL = 15000;
+
+function isDbTemporarilyDown(): boolean {
+  return Date.now() - lastDbFailure < DB_RETRY_INTERVAL;
+}
+
+function markDbFailed(): void {
+  lastDbFailure = Date.now();
+}
+
 export class ChannelRepository {
   /**
    * Retrieves all connected channels for a workspace.
    * Tries PostgreSQL via Prisma first, falls back to persistent local storage if DB is offline.
    */
   async getConnectedChannels(workspaceSlug: string = "default"): Promise<ConnectedChannelRecord[]> {
-    try {
-      const workspace = await prisma.workspace.findUnique({
-        where: { slug: workspaceSlug },
-        include: {
-          youtubeAccounts: {
-            include: {
-              channels: true,
+    if (!isDbTemporarilyDown()) {
+      try {
+        const workspace = await prisma.workspace.findUnique({
+          where: { slug: workspaceSlug },
+          include: {
+            youtubeAccounts: {
+              include: {
+                channels: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (workspace && workspace.youtubeAccounts.length > 0) {
-        return workspace.youtubeAccounts.flatMap((acc) =>
-          acc.channels.map((ch) => ({
-            id: ch.id,
-            accountId: acc.id,
-            title: ch.title,
-            customUrl: ch.customUrl || undefined,
-            avatarUrl: ch.avatarUrl || undefined,
-            bannerUrl: ch.bannerUrl || undefined,
-            description: ch.description || undefined,
-            subscriberCount: Number(ch.subscriberCount),
-            viewCount: Number(ch.viewCount),
-            videoCount: ch.videoCount,
-            avgViewsPerVideo: ch.avgViewsPerVideo || undefined,
-            medianViews: ch.medianViews || undefined,
-            lastSyncedAt: ch.lastSyncedAt?.toISOString(),
-          }))
-        );
+        if (workspace && workspace.youtubeAccounts.length > 0) {
+          return workspace.youtubeAccounts.flatMap((acc) =>
+            acc.channels.map((ch) => ({
+              id: ch.id,
+              accountId: acc.id,
+              title: ch.title,
+              customUrl: ch.customUrl || undefined,
+              avatarUrl: ch.avatarUrl || undefined,
+              bannerUrl: ch.bannerUrl || undefined,
+              description: ch.description || undefined,
+              subscriberCount: Number(ch.subscriberCount),
+              viewCount: Number(ch.viewCount),
+              videoCount: ch.videoCount,
+              avgViewsPerVideo: ch.avgViewsPerVideo || undefined,
+              medianViews: ch.medianViews || undefined,
+              lastSyncedAt: ch.lastSyncedAt?.toISOString(),
+            }))
+          );
+        }
+      } catch {
+        markDbFailed();
       }
-    } catch {
-      // PostgreSQL is offline or unreachable; fall through to persistent local fallback
     }
 
     return readLocalChannels();
@@ -94,79 +107,81 @@ export class ChannelRepository {
     channel: ConnectedChannelRecord,
     workspaceSlug: string = "default"
   ): Promise<ConnectedChannelRecord> {
-    // 1. Always attempt PostgreSQL persistence
-    try {
-      let workspace = await prisma.workspace.findUnique({
-        where: { slug: workspaceSlug },
-      });
-
-      if (!workspace) {
-        workspace = await prisma.workspace.create({
-          data: { name: "Default Workspace", slug: workspaceSlug },
+    // 1. Always attempt PostgreSQL persistence if available
+    if (!isDbTemporarilyDown()) {
+      try {
+        let workspace = await prisma.workspace.findUnique({
+          where: { slug: workspaceSlug },
         });
-      }
 
-      const emailIdentifier = channel.customUrl
-        ? `${channel.customUrl.replace(/^@/, "")}@channel.youtube.com`
-        : `${channel.id}@channel.youtube.com`;
+        if (!workspace) {
+          workspace = await prisma.workspace.create({
+            data: { name: "Default Workspace", slug: workspaceSlug },
+          });
+        }
 
-      const ytAccount = await prisma.youTubeAccount.upsert({
-        where: {
-          workspaceId_googleId: {
+        const emailIdentifier = channel.customUrl
+          ? `${channel.customUrl.replace(/^@/, "")}@channel.youtube.com`
+          : `${channel.id}@channel.youtube.com`;
+
+        const ytAccount = await prisma.youTubeAccount.upsert({
+          where: {
+            workspaceId_googleId: {
+              workspaceId: workspace.id,
+              googleId: channel.id,
+            },
+          },
+          update: {
+            channelId: channel.id,
+            email: emailIdentifier,
+          },
+          create: {
             workspaceId: workspace.id,
             googleId: channel.id,
+            email: emailIdentifier,
+            channelId: channel.id,
+            accessToken: "connected_via_data_api",
+            refreshToken: "connected_via_data_api",
+            tokenExpiresAt: new Date(Date.now() + 365 * 24 * 3600 * 1000),
+            scopes: ["https://www.googleapis.com/auth/youtube.readonly"],
           },
-        },
-        update: {
-          channelId: channel.id,
-          email: emailIdentifier,
-        },
-        create: {
-          workspaceId: workspace.id,
-          googleId: channel.id,
-          email: emailIdentifier,
-          channelId: channel.id,
-          accessToken: "connected_via_data_api",
-          refreshToken: "connected_via_data_api",
-          tokenExpiresAt: new Date(Date.now() + 365 * 24 * 3600 * 1000),
-          scopes: ["https://www.googleapis.com/auth/youtube.readonly"],
-        },
-      });
+        });
 
-      await prisma.channel.upsert({
-        where: { id: channel.id },
-        update: {
-          youtubeAccountId: ytAccount.id,
-          title: channel.title,
-          customUrl: channel.customUrl || null,
-          description: channel.description || null,
-          avatarUrl: channel.avatarUrl || null,
-          bannerUrl: channel.bannerUrl || null,
-          subscriberCount: BigInt(channel.subscriberCount),
-          viewCount: BigInt(channel.viewCount),
-          videoCount: channel.videoCount,
-          avgViewsPerVideo: channel.avgViewsPerVideo || null,
-          medianViews: channel.medianViews || null,
-          lastSyncedAt: new Date(),
-        },
-        create: {
-          id: channel.id,
-          youtubeAccountId: ytAccount.id,
-          title: channel.title,
-          customUrl: channel.customUrl || null,
-          description: channel.description || null,
-          avatarUrl: channel.avatarUrl || null,
-          bannerUrl: channel.bannerUrl || null,
-          subscriberCount: BigInt(channel.subscriberCount),
-          viewCount: BigInt(channel.viewCount),
-          videoCount: channel.videoCount,
-          avgViewsPerVideo: channel.avgViewsPerVideo || null,
-          medianViews: channel.medianViews || null,
-          lastSyncedAt: new Date(),
-        },
-      });
-    } catch {
-      // PostgreSQL is offline in this environment; maintain local file persistence
+        await prisma.channel.upsert({
+          where: { id: channel.id },
+          update: {
+            youtubeAccountId: ytAccount.id,
+            title: channel.title,
+            customUrl: channel.customUrl || null,
+            description: channel.description || null,
+            avatarUrl: channel.avatarUrl || null,
+            bannerUrl: channel.bannerUrl || null,
+            subscriberCount: BigInt(channel.subscriberCount),
+            viewCount: BigInt(channel.viewCount),
+            videoCount: channel.videoCount,
+            avgViewsPerVideo: channel.avgViewsPerVideo || null,
+            medianViews: channel.medianViews || null,
+            lastSyncedAt: new Date(),
+          },
+          create: {
+            id: channel.id,
+            youtubeAccountId: ytAccount.id,
+            title: channel.title,
+            customUrl: channel.customUrl || null,
+            description: channel.description || null,
+            avatarUrl: channel.avatarUrl || null,
+            bannerUrl: channel.bannerUrl || null,
+            subscriberCount: BigInt(channel.subscriberCount),
+            viewCount: BigInt(channel.viewCount),
+            videoCount: channel.videoCount,
+            avgViewsPerVideo: channel.avgViewsPerVideo || null,
+            medianViews: channel.medianViews || null,
+            lastSyncedAt: new Date(),
+          },
+        });
+      } catch {
+        markDbFailed();
+      }
     }
 
     // 2. Persist in local storage so it survives server restarts even without active PostgreSQL
@@ -189,20 +204,22 @@ export class ChannelRepository {
     channelId: string,
     updates: Partial<ConnectedChannelRecord>
   ): Promise<ConnectedChannelRecord | null> {
-    try {
-      await prisma.channel.update({
-        where: { id: channelId },
-        data: {
-          subscriberCount: updates.subscriberCount !== undefined ? BigInt(updates.subscriberCount) : undefined,
-          viewCount: updates.viewCount !== undefined ? BigInt(updates.viewCount) : undefined,
-          videoCount: updates.videoCount,
-          avgViewsPerVideo: updates.avgViewsPerVideo,
-          medianViews: updates.medianViews,
-          lastSyncedAt: new Date(),
-        },
-      });
-    } catch {
-      // PostgreSQL is offline; update local storage
+    if (!isDbTemporarilyDown()) {
+      try {
+        await prisma.channel.update({
+          where: { id: channelId },
+          data: {
+            subscriberCount: updates.subscriberCount !== undefined ? BigInt(updates.subscriberCount) : undefined,
+            viewCount: updates.viewCount !== undefined ? BigInt(updates.viewCount) : undefined,
+            videoCount: updates.videoCount,
+            avgViewsPerVideo: updates.avgViewsPerVideo,
+            medianViews: updates.medianViews,
+            lastSyncedAt: new Date(),
+          },
+        });
+      } catch {
+        markDbFailed();
+      }
     }
 
     const existing = readLocalChannels();
@@ -223,20 +240,22 @@ export class ChannelRepository {
    * Disconnects a channel from the workspace.
    */
   async disconnectChannel(channelId: string): Promise<void> {
-    try {
-      await prisma.youTubeAccount.deleteMany({
-        where: { channelId },
-      });
-      await prisma.channel.delete({
-        where: { id: channelId },
-      }).catch(async () => {
-        await prisma.channel.update({
-          where: { id: channelId },
-          data: { youtubeAccountId: null },
+    if (!isDbTemporarilyDown()) {
+      try {
+        await prisma.youTubeAccount.deleteMany({
+          where: { channelId },
         });
-      });
-    } catch {
-      // Ignore DB errors
+        await prisma.channel.delete({
+          where: { id: channelId },
+        }).catch(async () => {
+          await prisma.channel.update({
+            where: { id: channelId },
+            data: { youtubeAccountId: null },
+          });
+        });
+      } catch {
+        markDbFailed();
+      }
     }
 
     const existing = readLocalChannels();
