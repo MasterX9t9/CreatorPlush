@@ -729,7 +729,7 @@ export function LandingPage() {
               </div>
               <h3 className="text-base font-bold text-white">Find An Algorithmic Outlier</h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Scan your niche for videos that achieved 5x to 15x more views than the channel's standard subscriber count or view median.
+                Scan your niche for videos that achieved 5x to 15x more views than the channel&apos;s standard subscriber count or view median.
               </p>
             </div>
 

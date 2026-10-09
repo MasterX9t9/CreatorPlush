@@ -263,7 +263,7 @@ export function DashboardView() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Connected Active
                 </span>
-                <AttributionBadge source="YouTube Data API v3" type="official" />
+                <AttributionBadge type="official" sourceText="YouTube Data API v3" />
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-2">
                 {activeChannel.customUrl && (
@@ -405,67 +405,55 @@ export function DashboardView() {
       {/* METRIC OVERVIEW CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Total Subscribers"
+          label="Total Subscribers"
           value={activeChannel ? formatCompactNumber(activeChannel.subscriberCount) : "—"}
-          change={activeChannel ? "Official YouTube Data" : "No channel connected"}
-          trend="neutral"
-          icon={<Users className="w-5 h-5 text-primary" />}
-          attribution={{
-            source: "YouTube Data API v3",
-            type: "official",
-          }}
+          subValue={activeChannel ? "Official YouTube Data" : "No channel connected"}
+          dataType="official"
+          sourceText="YouTube Data API v3"
+          icon={Users}
         />
 
         <MetricCard
-          title="Lifetime Views"
+          label="Lifetime Views"
           value={activeChannel ? formatCompactNumber(activeChannel.viewCount) : "—"}
-          change={
+          subValue={
             activeChannel
               ? `Avg ${formatCompactNumber(activeChannel.avgViewsPerVideo || 0)} / video`
               : "Connect channel to view"
           }
-          trend={activeChannel ? "up" : "neutral"}
-          icon={<Eye className="w-5 h-5 text-blue-400" />}
-          attribution={{
-            source: "YouTube Data API v3",
-            type: "official",
-          }}
+          dataType="official"
+          sourceText="YouTube Data API v3"
+          icon={Eye}
         />
 
         <MetricCard
-          title="Published Videos"
+          label="Published Videos"
           value={activeChannel ? activeChannel.videoCount.toLocaleString() : "—"}
-          change={
+          subValue={
             activeChannel
               ? `Median ~${formatCompactNumber(activeChannel.medianViews || 0)} views`
               : "Upload stats unavailable"
           }
-          trend="neutral"
-          icon={<Youtube className="w-5 h-5 text-red-500" />}
-          attribution={{
-            source: "YouTube Data API v3",
-            type: "official",
-          }}
+          dataType="official"
+          sourceText="YouTube Data API v3"
+          icon={Youtube}
         />
 
         <MetricCard
-          title="Est. Monthly Revenue"
+          label="Est. Monthly Revenue"
           value={
             revenueEst
-              ? `$${formatCompactNumber(revenueEst.min)} – $${formatCompactNumber(revenueEst.max)}`
+              ? `$${formatCompactNumber(revenueEst.monthlyRevenueMin)} – $${formatCompactNumber(revenueEst.monthlyRevenueMax)}`
               : "—"
           }
-          change={
+          subValue={
             revenueEst
-              ? `RPM: $${revenueEst.rpmRange.min.toFixed(2)}–$${revenueEst.rpmRange.max.toFixed(2)}`
+              ? `RPM: $${revenueEst.rpmMin.toFixed(2)}–$${revenueEst.rpmMax.toFixed(2)}`
               : "Estimated from view velocity"
           }
-          trend="up"
-          icon={<DollarSign className="w-5 h-5 text-emerald-400" />}
-          attribution={{
-            source: "CreatorPulse Industry RPM Model",
-            type: "estimated",
-          }}
+          dataType="estimated"
+          sourceText="CreatorPulse Industry RPM Model"
+          icon={DollarSign}
         />
       </div>
 
@@ -501,7 +489,7 @@ export function DashboardView() {
             </div>
           ) : channelVideos.length === 0 ? (
             <div className="py-8 text-center text-xs text-muted-foreground border border-dashed border-white/10 rounded-xl">
-              No recent uploads indexed yet. Click "Sync" above to pull latest videos.
+              No recent uploads indexed yet. Click &quot;Sync&quot; above to pull latest videos.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
