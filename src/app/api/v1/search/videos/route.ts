@@ -1,7 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 
 export async function GET(request: NextRequest) {
+  // 1. Rate limiting protection (30 search queries/min per IP)
+  const clientIp = getClientIp(request);
+  const rateLimit = checkRateLimit(`search_${clientIp}`, 30, 60);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "TOO_MANY_REQUESTS",
+          message: `Search rate limit reached. Please wait ${rateLimit.resetSeconds} seconds before searching again.`,
+          status: 429,
+        },
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": rateLimit.resetSeconds.toString() },
+      }
+    );
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const q = searchParams.get("q");
 

@@ -22,10 +22,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Prisma
-# Keep schema and migrations, ignore local sqlite or temporary db dumps
+# Prisma & Local Fallback Store
 *.db
 *.sqlite
+.data/
 
 # OS and Editor files
 .DS_Store

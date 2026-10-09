@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/AuthContext";
 import {
   LayoutDashboard,
   Search,
@@ -98,6 +99,7 @@ const navSections: NavSection[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isAuthenticated, workspace } = useAuth();
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   const toggleSection = (title: string) => {
@@ -193,23 +195,26 @@ export function Sidebar() {
 
       {/* Workspace Footer Indicator */}
       <div className="p-3 border-t border-border/80 bg-background/50">
-        <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-white/5">
+        <Link
+          href={isAuthenticated ? "/settings/workspace" : "/login"}
+          className="flex items-center justify-between p-2 rounded-lg bg-card border border-white/5 hover:border-white/10 transition-colors block"
+        >
           <div className="flex items-center gap-2 truncate">
             <div className="w-6 h-6 rounded bg-primary/20 text-primary text-[11px] font-bold flex items-center justify-center">
-              W
+              {workspace ? workspace.name[0].toUpperCase() : "G"}
             </div>
             <div className="truncate">
               <div className="text-xs font-semibold text-foreground truncate">
-                Default Workspace
+                {workspace ? workspace.name : "Free Guest Workspace"}
               </div>
               <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                 <Shield className="w-2.5 h-2.5 text-emerald-400" />
-                Pro Tier
+                <span>{workspace ? `${workspace.planTier} Tier` : "Sign In to Save Data"}</span>
               </div>
             </div>
           </div>
           <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-        </div>
+        </Link>
       </div>
     </aside>
   );

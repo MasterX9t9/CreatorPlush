@@ -55,9 +55,11 @@ The CreatorPulse REST API adheres to modern HTTP/RESTful design principles:
 
 ## 3. Core API Endpoints
 
-### 3.1 Authentication & Workspace (`/api/v1/auth`, `/api/v1/workspaces`)
-- `POST /api/v1/auth/signup`: Register user with email/password.
-- `POST /api/v1/auth/login`: Authenticate and issue secure session cookie.
+### 3.1 Authentication & User Session (`/api/v1/auth`, `/api/v1/workspaces`)
+- `POST /api/v1/auth/signup`: Register user with email, password (min 8 chars), and name. Hashes password with bcrypt, initializes isolated workspace, and issues secure HttpOnly `cp_session` cookie.
+- `POST /api/v1/auth/login`: Authenticate with email and password. Protected with anti-brute-force rate limiting (10 attempts/min). Issues secure HttpOnly `cp_session` cookie.
+- `POST /api/v1/auth/logout`: Clears session cookie and invalidates client session.
+- `GET /api/v1/auth/me`: Inspects session from HttpOnly cookie or Bearer token; returns authenticated user profile, active workspace, and plan tier.
 - `GET /api/v1/workspaces`: List workspaces for authenticated user.
 - `POST /api/v1/workspaces`: Create a new workspace.
 - `GET /api/v1/workspaces/current`: Retrieve active workspace details, plan tier, and usage counters.

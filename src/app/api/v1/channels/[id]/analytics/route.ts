@@ -2,11 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { estimateRevenueRange } from "@/lib/algorithms/revenue";
 import { evaluateChannelMonetization } from "@/lib/algorithms/monetization";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // 1. Client rate limiting protection (60 requests/min per IP)
+  const clientIp = getClientIp(request);
+  const rateLimit = checkRateLimit(`analytics_${clientIp}`, 60, 60);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "TOO_MANY_REQUESTS",
+          message: `Rate limit reached. Please wait ${rateLimit.resetSeconds} seconds before querying another channel.`,
+          status: 429,
+        },
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": rateLimit.resetSeconds.toString() },
+      }
+    );
+  }
+
   let channelInput = params.id;
 
   if (!channelInput) {

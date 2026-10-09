@@ -44,7 +44,17 @@ Status Key:
   - [x] App Layout Shell: Collapsible Sidebar, Topbar with live quota indicator, Language switcher
   - [x] Data attribution badge components (`Official`, `Calculated`, `Estimated`, `AI-Derived`)
   - [x] Honest UI states (MetricCard, Skeleton loading, Empty states)
-  - [x] Core Dashboard shell with honest OAuth connection requirements (`src/app/page.tsx`)
+- [x] Real Authentication & Security Shield
+  - [x] Bcrypt password hashing & verification (`src/lib/auth/password.ts`)
+  - [x] JWT token management with 7-day expiration (`src/lib/auth/jwt.ts`)
+  - [x] HttpOnly, SameSite session cookies (`src/lib/auth/session.ts`)
+  - [x] Multi-tenant User & Workspace repository (`src/lib/repositories/user-repository.ts`)
+  - [x] Anti-brute force sliding-window rate limiter & IP shielding (`src/lib/security/rate-limiter.ts`)
+  - [x] Auth API routes (`/api/v1/auth/signup`, `/api/v1/auth/login`, `/api/v1/auth/logout`, `/api/v1/auth/me`)
+  - [x] Client AuthContext and `useAuth` hook (`src/lib/auth/AuthContext.tsx`)
+  - [x] Glassmorphic Login page with instant demo fill (`src/app/login/page.tsx`)
+  - [x] Registration page with password strength validation (`src/app/signup/page.tsx`)
+  - [x] Topbar & Sidebar dynamic profile, plan tier, and Sign Out integration
 - [x] Core Research & Extension Modules
   - [x] YouTube Search page (`src/app/research/search/page.tsx`)
   - [x] Statistical Outliers Explorer (`src/app/research/outliers/page.tsx`)
