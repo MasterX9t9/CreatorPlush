@@ -86,7 +86,7 @@ The CreatorPulse REST API adheres to modern HTTP/RESTful design principles:
 - `GET /api/v1/channels/:id/videos`: Paginated list of videos for the channel with outlier metrics.
 
 ### 3.5 Video Analytics (`/api/v1/videos`)
-- `GET /api/v1/videos/:id`: Video intelligence summary (views, likes, comments, duration, views/hour, views/subscriber).
+- `GET /api/v1/videos/:id`: Video intelligence summary (views, likes, comments, duration, hidden video tags, SEO keywords, publish timing window analysis, technical DNA, velocity, and engagement rates).
 - `GET /api/v1/videos/:id/outlier`: Outlier calculation explanation showing expected views vs actual multiplier.
 - `GET /api/v1/videos/:id/transcript`: Video transcript segments with search and timestamps (returns 404 if unavailable).
 - `GET /api/v1/videos/:id/comments/sentiment`: Sentiment breakdown and theme extraction for top comments.

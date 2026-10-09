@@ -3,6 +3,41 @@ import { AttributedMetric, MetricAttribution, OutlierAnalysis } from "@/lib/type
 import { calculateExpectedViews, calculateOutlierScore } from "@/lib/algorithms/outliers";
 import { quotaCache, QuotaTracker } from "@/lib/cache/quota-cache";
 
+export const YOUTUBE_CATEGORIES: Record<string, string> = {
+  "1": "Film & Animation",
+  "2": "Autos & Vehicles",
+  "10": "Music",
+  "15": "Pets & Animals",
+  "17": "Sports",
+  "18": "Short Movies",
+  "19": "Travel & Events",
+  "20": "Gaming",
+  "21": "Videoblogging",
+  "22": "People & Blogs",
+  "23": "Comedy",
+  "24": "Entertainment",
+  "25": "News & Politics",
+  "26": "Howto & Style",
+  "27": "Education",
+  "28": "Science & Technology",
+  "29": "Nonprofits & Activism",
+  "30": "Movies",
+  "31": "Anime/Animation",
+  "32": "Action/Adventure",
+  "33": "Classics",
+  "34": "Comedy",
+  "35": "Documentary",
+  "36": "Drama",
+  "37": "Family",
+  "38": "Foreign",
+  "39": "Horror",
+  "40": "Sci-Fi/Fantasy",
+  "41": "Thriller",
+  "42": "Shorts",
+  "43": "Shows",
+  "44": "Trailers",
+};
+
 export interface YouTubeVideoItem {
   id: string;
   title: string;
@@ -17,6 +52,14 @@ export interface YouTubeVideoItem {
   viewCount: number;
   likeCount: number;
   commentCount: number;
+  tags?: string[];
+  categoryId?: string;
+  categoryName?: string;
+  defaultAudioLanguage?: string;
+  defaultLanguage?: string;
+  hasCaptions?: boolean;
+  definition?: string;
+  licensedContent?: boolean;
   outlierAnalysis?: OutlierAnalysis;
   attribution: MetricAttribution;
 }
@@ -194,6 +237,16 @@ export class YouTubeProvider {
             viewCount,
             likeCount,
             commentCount,
+            tags: v.snippet?.tags || [],
+            categoryId: v.snippet?.categoryId || undefined,
+            categoryName: v.snippet?.categoryId
+              ? YOUTUBE_CATEGORIES[v.snippet.categoryId] || "General"
+              : undefined,
+            defaultAudioLanguage: v.snippet?.defaultAudioLanguage || undefined,
+            defaultLanguage: v.snippet?.defaultLanguage || undefined,
+            hasCaptions: v.contentDetails?.caption === "true",
+            definition: v.contentDetails?.definition || "hd",
+            licensedContent: Boolean(v.contentDetails?.licensedContent),
             attribution,
           };
         }
@@ -410,6 +463,16 @@ export class YouTubeProvider {
         viewCount,
         likeCount,
         commentCount,
+        tags: v.snippet?.tags || [],
+        categoryId: v.snippet?.categoryId || undefined,
+        categoryName: v.snippet?.categoryId
+          ? YOUTUBE_CATEGORIES[v.snippet.categoryId] || "General"
+          : undefined,
+        defaultAudioLanguage: v.snippet?.defaultAudioLanguage || undefined,
+        defaultLanguage: v.snippet?.defaultLanguage || undefined,
+        hasCaptions: v.contentDetails?.caption === "true",
+        definition: v.contentDetails?.definition || "hd",
+        licensedContent: Boolean(v.contentDetails?.licensedContent),
         attribution,
       };
 
@@ -635,6 +698,16 @@ export class YouTubeProvider {
         viewCount,
         likeCount,
         commentCount,
+        tags: v.snippet?.tags || [],
+        categoryId: v.snippet?.categoryId || undefined,
+        categoryName: v.snippet?.categoryId
+          ? YOUTUBE_CATEGORIES[v.snippet.categoryId] || "General"
+          : undefined,
+        defaultAudioLanguage: v.snippet?.defaultAudioLanguage || undefined,
+        defaultLanguage: v.snippet?.defaultLanguage || undefined,
+        hasCaptions: v.contentDetails?.caption === "true",
+        definition: v.contentDetails?.definition || "hd",
+        licensedContent: Boolean(v.contentDetails?.licensedContent),
         attribution,
       };
     });

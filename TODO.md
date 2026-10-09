@@ -88,9 +88,13 @@ Status Key:
   - [x] Historical snapshot tracking
   - [x] Long-form vs Shorts breakdown
 - [x] Video Analytics
-  - [x] Video detail intelligence (views/hour, views/subscriber, engagement rate)
+  - [x] Video detail intelligence (views/hour, views/subscriber, engagement rate, like-to-view rate, comment rate)
   - [x] Outlier score visualization with expected vs actual baseline
   - [x] Revenue and RPM estimation engine (bracket ranges)
+  - [x] Hidden Video Tags & SEO Discovery Intelligence (`snippet.tags`, character count out of 500, title match keywords vs hidden discovery keywords, one-click "Copy All Tags", SEO density score)
+  - [x] Publish Timing & Optimal Upload Window Analysis (UTC & local timestamp, weekday vs weekend, peak window alignment, format duration advice)
+  - [x] Technical Video DNA (Category name, HD/4K definition, Captions availability, Audio language)
+  - [x] 1-Click Save to Swipe File with PostgreSQL persistence
 
 ---
 
