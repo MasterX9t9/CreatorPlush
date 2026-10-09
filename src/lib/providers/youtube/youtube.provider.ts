@@ -247,12 +247,73 @@ export class YouTubeProvider {
     try {
       quotaCache.recordQuota(1);
 
-      const res = await youtube.channels.list({
-        part: ["snippet", "statistics", "brandingSettings"],
-        id: [channelId],
-      });
+      let item: any = null;
+      let cleanInput = channelId.trim();
 
-      const item = res.data.items?.[0];
+      // Extract from full URLs if pasted
+      if (cleanInput.includes("youtube.com/@")) {
+        cleanInput = cleanInput.split("youtube.com/@")[1].split("/")[0].split("?")[0];
+      } else if (cleanInput.includes("youtube.com/channel/")) {
+        cleanInput = cleanInput.split("youtube.com/channel/")[1].split("/")[0].split("?")[0];
+      }
+
+      // Query by Handle if starts with @ or resolved from URL
+      if (cleanInput.startsWith("@")) {
+        const handle = cleanInput.substring(1);
+        const res = await youtube.channels.list({
+          part: ["snippet", "statistics", "brandingSettings"],
+          forHandle: handle,
+        });
+        item = res.data.items?.[0];
+      } else if (/^UC[\w-]{22}$/.test(cleanInput)) {
+        // Query by standard 24-character YouTube Channel ID
+        const res = await youtube.channels.list({
+          part: ["snippet", "statistics", "brandingSettings"],
+          id: [cleanInput],
+        });
+        item = res.data.items?.[0];
+      } else {
+        // Try forHandle first
+        try {
+          const res = await youtube.channels.list({
+            part: ["snippet", "statistics", "brandingSettings"],
+            forHandle: cleanInput,
+          });
+          item = res.data.items?.[0];
+        } catch {
+          // ignore error and try next strategy
+        }
+
+        if (!item) {
+          try {
+            const res = await youtube.channels.list({
+              part: ["snippet", "statistics", "brandingSettings"],
+              id: [cleanInput],
+            });
+            item = res.data.items?.[0];
+          } catch {
+            // ignore error
+          }
+        }
+
+        if (!item) {
+          // Search channel by name / vanity URL
+          const searchRes = await youtube.search.list({
+            part: ["snippet"],
+            q: cleanInput,
+            type: ["channel"],
+            maxResults: 1,
+          });
+          const foundId = searchRes.data.items?.[0]?.id?.channelId;
+          if (foundId) {
+            const chRes = await youtube.channels.list({
+              part: ["snippet", "statistics", "brandingSettings"],
+              id: [foundId],
+            });
+            item = chRes.data.items?.[0];
+          }
+        }
+      }
       if (!item) return null;
 
       const subCount = parseInt(item.statistics?.subscriberCount || "0", 10);

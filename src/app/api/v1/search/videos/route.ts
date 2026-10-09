@@ -29,7 +29,63 @@ export async function GET(request: NextRequest) {
   const publishedAfter = searchParams.get("publishedAfter") || undefined;
   const publishedBefore = searchParams.get("publishedBefore") || undefined;
 
+  // Detect if query is a direct YouTube video URL (costs 1 unit vs 100 units for search)
+  function extractVideoId(query: string): string | null {
+    const trimmed = query.trim();
+    const watchMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+    if (watchMatch) return watchMatch[1];
+    const shortMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (shortMatch) return shortMatch[1];
+    const shortsMatch = trimmed.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+    if (shortsMatch) return shortsMatch[1];
+    return null;
+  }
+
+  const directVideoId = extractVideoId(q);
+
   try {
+    if (directVideoId) {
+      const directVideo = await youtubeProvider.getVideo(directVideoId);
+      if (directVideo) {
+        return NextResponse.json({
+          success: true,
+          data: [directVideo],
+          metadata: directVideo.attribution,
+          pagination: {
+            totalResults: 1,
+            hasMore: false,
+          },
+        });
+      }
+    }
+
+    // Check if query is a channel URL or handle (e.g. @LegendMangaReels or https://www.youtube.com/@...)
+    const isChannelQuery =
+      q.includes("youtube.com/@") ||
+      q.includes("youtube.com/channel/") ||
+      q.trim().startsWith("@");
+
+    if (isChannelQuery) {
+      const ch = await youtubeProvider.getChannel(q);
+      if (ch) {
+        const { videos } = await youtubeProvider.getChannelVideosWithOutliers(ch.id, maxResults);
+        return NextResponse.json({
+          success: true,
+          data: videos,
+          metadata: {
+            source: "youtube_data_api",
+            dataType: "official",
+            timestamp: new Date().toISOString(),
+            confidence: 1.0,
+          },
+          pagination: {
+            totalResults: videos.length,
+            hasMore: false,
+          },
+        });
+      }
+    }
+
     const result = await youtubeProvider.searchVideos({
       q,
       maxResults,
