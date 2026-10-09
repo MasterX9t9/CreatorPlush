@@ -166,8 +166,9 @@ Status Key:
   - [x] Rate-limited `/api/v1/...` endpoints with sliding window
 - [x] Webhook Dispatcher
   - [x] Cryptographic HMAC signature generation and delivery (`src/lib/webhooks/dispatcher.ts`, `/api/v1/webhooks`, `/api/v1/webhooks/[id]`)
-- [-] Background Workers
-  - [-] Queue processor for channel synchronization
+- [x] Background Workers
+  - [x] Queue processor for channel synchronization and outlier alerts (`src/lib/workers/queue.ts`, `/api/v1/jobs/sync-channel`, `/api/v1/jobs/[id]`)
+  - [x] Notification engine and mark-as-read endpoints (`/api/v1/notifications`, `/api/v1/notifications/[id]/read`)
 
 ---
 
@@ -181,8 +182,8 @@ Status Key:
 
 ## Phase 12: Production Hardening & Verification
 - [x] Test Suite Execution
-  - [x] Unit tests passing (`npm run test` - 23 passing tests)
+  - [x] Unit & Integration tests passing (`npm run test` - 34 passing tests across 10 suites)
   - [x] Type check passing (`npm run typecheck` - 0 errors)
   - [x] Lint check passing (`npm run lint` - 0 errors)
-  - [x] Production build verification (`npm run build` - 41 routes verified)
-- [x] End-to-End User Verification Workflow
+  - [x] Production build verification (`npm run build` - 43 routes verified)
+- [x] End-to-End User Verification Workflow (`src/__tests__/integration/e2e-workflow.test.ts`)
