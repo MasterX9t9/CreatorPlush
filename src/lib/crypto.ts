@@ -57,3 +57,21 @@ export function decryptToken(cipherString: string): string {
 export function hashApiKey(key: string): string {
   return crypto.createHash("sha256").update(key).digest("hex");
 }
+
+/**
+ * Generates a high-entropy API key with human-readable prefix
+ */
+export function generateApiKey(prefix = "cp_live"): { rawKey: string; keyHash: string; keyPrefix: string } {
+  const entropy = crypto.randomBytes(24).toString("base64url");
+  const rawKey = `${prefix}_${entropy}`;
+  const keyHash = hashApiKey(rawKey);
+  const keyPrefix = `${prefix}_${rawKey.substring(prefix.length + 1, prefix.length + 5)}...`;
+  return { rawKey, keyHash, keyPrefix };
+}
+
+/**
+ * Computes HMAC-SHA256 signature for webhook verification
+ */
+export function generateHmacSignature(payload: string, secret: string): string {
+  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
+}

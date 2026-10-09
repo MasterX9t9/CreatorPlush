@@ -22,6 +22,11 @@ import {
   Flame,
   AlertCircle,
   FileText,
+  Smile,
+  Frown,
+  HelpCircle,
+  Lightbulb,
+  Loader2,
 } from "lucide-react";
 
 interface VideoDetails {
@@ -40,6 +45,20 @@ interface VideoDetails {
   viewsPerDay: number;
 }
 
+interface SentimentData {
+  disabled: boolean;
+  message?: string;
+  sampleCount: number;
+  positivePct: number;
+  neutralPct: number;
+  negativePct: number;
+  sentimentScore: number;
+  topThemes: string[];
+  viewerRequests: string[];
+  commonQuestions: string[];
+  recentSample?: Array<{ id: string; author: string; text: string; likeCount: number }>;
+}
+
 function VideoAnalyticsContent() {
   const searchParams = useSearchParams();
   const initialVideoId = searchParams.get("id") || "";
@@ -48,6 +67,10 @@ function VideoAnalyticsContent() {
   const [videoData, setVideoData] = useState<VideoDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [sentimentData, setSentimentData] = useState<SentimentData | null>(null);
+  const [sentimentLoading, setSentimentLoading] = useState(false);
+  const [sentimentError, setSentimentError] = useState<string | null>(null);
 
   const fetchVideo = async (videoId: string) => {
     if (!videoId.trim()) return;
@@ -99,12 +122,32 @@ function VideoAnalyticsContent() {
           engagementRate,
           viewsPerDay,
         });
+
+        fetchSentiment(item.id);
       }
     } catch (err: any) {
       setError(err?.message || "Failed to load video intelligence.");
       setVideoData(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchSentiment = async (videoId: string) => {
+    setSentimentLoading(true);
+    setSentimentError(null);
+    try {
+      const res = await fetch(`/api/v1/videos/${videoId}/comments/sentiment`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setSentimentData(json.data);
+      } else {
+        setSentimentError(json.error?.message || "Failed to analyze comments");
+      }
+    } catch (err: any) {
+      setSentimentError(err?.message || "Error analyzing comments");
+    } finally {
+      setSentimentLoading(false);
     }
   };
 
@@ -246,6 +289,147 @@ function VideoAnalyticsContent() {
               sourceText="Benchmark RPM ($2.0–$5.5)"
               icon={DollarSign}
             />
+          </div>
+
+          {/* Comment & Audience Sentiment Section */}
+          <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    Audience & Comment Sentiment Analysis
+                  </h3>
+                  <AttributionBadge type="calculated" sourceText="internal_calculation" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Analyzes public comment threads to extract viewer feedback, questions, and content requests.
+                </p>
+              </div>
+
+              {sentimentData && !sentimentData.disabled && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-muted-foreground">Sample:</span>
+                  <span className="font-bold text-foreground">{sentimentData.sampleCount} Comments</span>
+                </div>
+              )}
+            </div>
+
+            {sentimentLoading && (
+              <div className="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Extracting public comments and analyzing sentiment...</span>
+              </div>
+            )}
+
+            {sentimentError && (
+              <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-950/20 text-rose-300 text-xs">
+                {sentimentError}
+              </div>
+            )}
+
+            {sentimentData?.disabled && (
+              <div className="p-4 rounded-xl border border-white/10 bg-white/5 text-xs text-muted-foreground">
+                Comments are disabled or restricted for this video on YouTube.
+              </div>
+            )}
+
+            {sentimentData && !sentimentData.disabled && !sentimentLoading && (
+              <div className="space-y-6">
+                {/* Sentiment Distribution Bar */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-emerald-400 flex items-center gap-1">
+                      <Smile className="w-3.5 h-3.5" /> Positive {sentimentData.positivePct}%
+                    </span>
+                    <span className="text-muted-foreground">
+                      Neutral {sentimentData.neutralPct}%
+                    </span>
+                    <span className="text-rose-400 flex items-center gap-1">
+                      <Frown className="w-3.5 h-3.5" /> Negative {sentimentData.negativePct}%
+                    </span>
+                  </div>
+                  <div className="w-full h-3 rounded-full overflow-hidden flex bg-white/5">
+                    <div
+                      className="bg-emerald-500 h-full transition-all"
+                      style={{ width: `${sentimentData.positivePct}%` }}
+                    />
+                    <div
+                      className="bg-muted-foreground/30 h-full transition-all"
+                      style={{ width: `${sentimentData.neutralPct}%` }}
+                    />
+                    <div
+                      className="bg-rose-500 h-full transition-all"
+                      style={{ width: `${sentimentData.negativePct}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Top Recurring Themes */}
+                {sentimentData.topThemes.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">
+                      Frequent Discussion Keywords
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {sentimentData.topThemes.map((theme, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs text-foreground font-medium"
+                        >
+                          #{theme}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Grid for Requests & Questions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Viewer Requests */}
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2">
+                    <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <Lightbulb className="w-4 h-4 text-amber-400" />
+                      Content Ideas & Viewer Requests
+                    </h4>
+                    {sentimentData.viewerRequests.length > 0 ? (
+                      <ul className="space-y-2 text-xs text-muted-foreground">
+                        {sentimentData.viewerRequests.map((req, i) => (
+                          <li key={i} className="border-l-2 border-amber-400/50 pl-2 text-foreground/90">
+                            &ldquo;{req}&rdquo;
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        No specific content requests detected in the sampled comments.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Common Questions */}
+                  <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2">
+                    <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <HelpCircle className="w-4 h-4 text-blue-400" />
+                      Audience Inquiries & Questions
+                    </h4>
+                    {sentimentData.commonQuestions.length > 0 ? (
+                      <ul className="space-y-2 text-xs text-muted-foreground">
+                        {sentimentData.commonQuestions.map((q, i) => (
+                          <li key={i} className="border-l-2 border-blue-400/50 pl-2 text-foreground/90">
+                            &ldquo;{q}&rdquo;
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        No common audience questions detected in the sample.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

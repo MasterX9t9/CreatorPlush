@@ -289,6 +289,152 @@ export class YouTubeProvider {
   }
 
   /**
+   * Fetch single video details with official statistics and caching
+   */
+  async getVideo(videoId: string): Promise<YouTubeVideoItem | null> {
+    const cacheKey = `video_${videoId}`;
+    const cached = quotaCache.get<YouTubeVideoItem>(cacheKey);
+    if (cached) {
+      return {
+        ...cached.value,
+        attribution: {
+          ...cached.value.attribution,
+          timestamp: cached.createdAt,
+        },
+      };
+    }
+
+    const youtube = this.getClient();
+    const nowIso = new Date().toISOString();
+
+    const attribution: MetricAttribution = {
+      source: "youtube_data_api",
+      dataType: "official",
+      timestamp: nowIso,
+      confidence: 1.0,
+    };
+
+    try {
+      quotaCache.recordQuota(1);
+
+      const res = await youtube.videos.list({
+        part: ["snippet", "contentDetails", "statistics"],
+        id: [videoId],
+      });
+
+      const v = res.data.items?.[0];
+      if (!v) return null;
+
+      const durationSec = parseIsoDuration(v.contentDetails?.duration || "");
+      const isShort = durationSec > 0 && durationSec <= 60;
+      const viewCount = parseInt(v.statistics?.viewCount || "0", 10);
+      const likeCount = parseInt(v.statistics?.likeCount || "0", 10);
+      const commentCount = parseInt(v.statistics?.commentCount || "0", 10);
+
+      const videoItem: YouTubeVideoItem = {
+        id: v.id || videoId,
+        title: v.snippet?.title || "Untitled Video",
+        description: v.snippet?.description || "",
+        channelId: v.snippet?.channelId || "",
+        channelTitle: v.snippet?.channelTitle || "Unknown Channel",
+        publishedAt: v.snippet?.publishedAt || "",
+        thumbnailUrl:
+          v.snippet?.thumbnails?.maxres?.url ||
+          v.snippet?.thumbnails?.high?.url ||
+          v.snippet?.thumbnails?.medium?.url ||
+          "",
+        durationSec,
+        durationFormatted: formatDuration(durationSec),
+        isShort,
+        viewCount,
+        likeCount,
+        commentCount,
+        attribution,
+      };
+
+      quotaCache.set(cacheKey, videoItem, 21600, "youtube_data_api");
+      return videoItem;
+    } catch (error: any) {
+      if (error?.code === 403 && error?.message?.includes("quota")) {
+        throw new Error("YOUTUBE_QUOTA_EXCEEDED: Daily YouTube quota exceeded.");
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch public video comments via official commentThreads API
+   */
+  async getVideoComments(
+    videoId: string,
+    maxResults = 50
+  ): Promise<{
+    disabled: boolean;
+    comments: Array<{
+      id: string;
+      author: string;
+      text: string;
+      likeCount: number;
+      publishedAt: string;
+    }>;
+    attribution: MetricAttribution;
+  }> {
+    const youtube = this.getClient();
+    const nowIso = new Date().toISOString();
+
+    const attribution: MetricAttribution = {
+      source: "youtube_data_api",
+      dataType: "official",
+      timestamp: nowIso,
+      confidence: 1.0,
+    };
+
+    try {
+      quotaCache.recordQuota(1);
+
+      const res = await youtube.commentThreads.list({
+        part: ["snippet"],
+        videoId,
+        maxResults: Math.min(maxResults, 100),
+        order: "relevance",
+        textFormat: "plainText",
+      });
+
+      const comments = (res.data.items || []).map((thread) => {
+        const top = thread.snippet?.topLevelComment?.snippet;
+        return {
+          id: thread.id || "",
+          author: top?.authorDisplayName || "Anonymous",
+          text: top?.textDisplay || top?.textOriginal || "",
+          likeCount: top?.likeCount || 0,
+          publishedAt: top?.publishedAt || "",
+        };
+      });
+
+      return {
+        disabled: false,
+        comments,
+        attribution,
+      };
+    } catch (error: any) {
+      if (
+        error?.code === 403 &&
+        (error?.message?.includes("commentsDisabled") || error?.errors?.[0]?.reason === "commentsDisabled")
+      ) {
+        return {
+          disabled: true,
+          comments: [],
+          attribution,
+        };
+      }
+      if (error?.code === 403 && error?.message?.includes("quota")) {
+        throw new Error("YOUTUBE_QUOTA_EXCEEDED: Daily YouTube quota exceeded.");
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Search channels by keyword
    */
   async searchChannels(query: string, maxResults = 10): Promise<{

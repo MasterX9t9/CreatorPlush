@@ -28,6 +28,7 @@ import {
   Youtube,
   Shield,
   Layers,
+  Scale,
 } from "lucide-react";
 
 interface NavItem {
@@ -63,6 +64,7 @@ const navSections: NavSection[] = [
     title: "Analytics",
     items: [
       { label: "Channel Analytics", href: "/analytics/channels", icon: BarChart3 },
+      { label: "Channel Benchmark", href: "/analytics/compare", icon: Scale },
       { label: "Video Analytics", href: "/analytics/videos", icon: Video },
       { label: "Shorts Analytics", href: "/analytics/shorts", icon: Zap },
       { label: "Revenue & RPM", href: "/analytics/revenue", icon: DollarSign },
