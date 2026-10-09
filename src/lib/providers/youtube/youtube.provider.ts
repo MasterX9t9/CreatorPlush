@@ -302,31 +302,85 @@ export class YouTubeProvider {
 
       let item: any = null;
       let cleanInput = channelId.trim();
-
-      // Extract from full URLs if pasted
-      if (cleanInput.includes("youtube.com/@")) {
-        cleanInput = cleanInput.split("youtube.com/@")[1].split("/")[0].split("?")[0];
-      } else if (cleanInput.includes("youtube.com/channel/")) {
-        cleanInput = cleanInput.split("youtube.com/channel/")[1].split("/")[0].split("?")[0];
+      try {
+        cleanInput = decodeURIComponent(cleanInput).trim();
+      } catch {
+        // Keep raw
       }
 
-      // Query by Handle if starts with @ or resolved from URL
+      // 1. If user pasted a video URL, resolve the channel through the video
+      if (
+        cleanInput.includes("watch?v=") ||
+        cleanInput.includes("youtu.be/") ||
+        cleanInput.includes("youtube.com/shorts/")
+      ) {
+        let videoId = "";
+        if (cleanInput.includes("watch?v=")) {
+          videoId = cleanInput.split("watch?v=")[1].split("&")[0].split("?")[0].split("#")[0];
+        } else if (cleanInput.includes("youtu.be/")) {
+          videoId = cleanInput.split("youtu.be/")[1].split("/")[0].split("?")[0].split("#")[0];
+        } else if (cleanInput.includes("youtube.com/shorts/")) {
+          videoId = cleanInput.split("youtube.com/shorts/")[1].split("/")[0].split("?")[0].split("#")[0];
+        }
+        if (videoId) {
+          try {
+            const vRes = await youtube.videos.list({
+              part: ["snippet"],
+              id: [videoId],
+            });
+            const foundChId = vRes.data.items?.[0]?.snippet?.channelId;
+            if (foundChId) {
+              cleanInput = foundChId;
+            }
+          } catch {
+            // Fall through to standard parsing
+          }
+        }
+      }
+
+      // 2. Extract identifier from channel URLs (/..., /videos, /shorts, query params)
+      if (cleanInput.includes("/@")) {
+        cleanInput = "@" + cleanInput.split("/@")[1].split("/")[0].split("?")[0].split("#")[0];
+      } else if (cleanInput.includes("/channel/")) {
+        cleanInput = cleanInput.split("/channel/")[1].split("/")[0].split("?")[0].split("#")[0];
+      } else if (cleanInput.includes("/c/")) {
+        cleanInput = cleanInput.split("/c/")[1].split("/")[0].split("?")[0].split("#")[0];
+      } else if (cleanInput.includes("/user/")) {
+        cleanInput = cleanInput.split("/user/")[1].split("/")[0].split("?")[0].split("#")[0];
+      } else if (cleanInput.includes("youtube.com/")) {
+        const segment = cleanInput.split("youtube.com/")[1].split("/")[0].split("?")[0].split("#")[0];
+        if (segment) cleanInput = segment;
+      }
+
+      // 3. Query strategy A: Direct @handle lookup
       if (cleanInput.startsWith("@")) {
         const handle = cleanInput.substring(1);
-        const res = await youtube.channels.list({
-          part: ["snippet", "statistics", "brandingSettings"],
-          forHandle: handle,
-        });
-        item = res.data.items?.[0];
-      } else if (/^UC[\w-]{22}$/.test(cleanInput)) {
-        // Query by standard 24-character YouTube Channel ID
-        const res = await youtube.channels.list({
-          part: ["snippet", "statistics", "brandingSettings"],
-          id: [cleanInput],
-        });
-        item = res.data.items?.[0];
-      } else {
-        // Try forHandle first
+        try {
+          const res = await youtube.channels.list({
+            part: ["snippet", "statistics", "brandingSettings"],
+            forHandle: handle,
+          });
+          item = res.data.items?.[0];
+        } catch {
+          // Fall through
+        }
+      }
+
+      // 4. Query strategy B: Standard 24-character YouTube Channel ID (UC...)
+      if (!item && /^UC[\w-]{22}$/.test(cleanInput)) {
+        try {
+          const res = await youtube.channels.list({
+            part: ["snippet", "statistics", "brandingSettings"],
+            id: [cleanInput],
+          });
+          item = res.data.items?.[0];
+        } catch {
+          // Fall through
+        }
+      }
+
+      // 5. Query strategy C: Handle without leading @
+      if (!item) {
         try {
           const res = await youtube.channels.list({
             part: ["snippet", "statistics", "brandingSettings"],
@@ -334,23 +388,26 @@ export class YouTubeProvider {
           });
           item = res.data.items?.[0];
         } catch {
-          // ignore error and try next strategy
+          // Fall through
         }
+      }
 
-        if (!item) {
-          try {
-            const res = await youtube.channels.list({
-              part: ["snippet", "statistics", "brandingSettings"],
-              id: [cleanInput],
-            });
-            item = res.data.items?.[0];
-          } catch {
-            // ignore error
-          }
+      // 6. Query strategy D: Standard ID fallback
+      if (!item) {
+        try {
+          const res = await youtube.channels.list({
+            part: ["snippet", "statistics", "brandingSettings"],
+            id: [cleanInput],
+          });
+          item = res.data.items?.[0];
+        } catch {
+          // Fall through
         }
+      }
 
-        if (!item) {
-          // Search channel by name / vanity URL
+      // 7. Query strategy E: Search by channel name or title keyword
+      if (!item) {
+        try {
           const searchRes = await youtube.search.list({
             part: ["snippet"],
             q: cleanInput,
@@ -365,8 +422,11 @@ export class YouTubeProvider {
             });
             item = chRes.data.items?.[0];
           }
+        } catch {
+          // Fall through
         }
       }
+
       if (!item) return null;
 
       const subCount = parseInt(item.statistics?.subscriberCount || "0", 10);
@@ -650,10 +710,18 @@ export class YouTubeProvider {
       confidence: 1.0,
     };
 
+    let canonicalId = channelId.trim();
+    if (!/^UC[\w-]{22}$/.test(canonicalId)) {
+      const resolved = await this.getChannel(canonicalId);
+      if (resolved) {
+        canonicalId = resolved.id;
+      }
+    }
+
     // 1. Search recent uploads from the channel
     const searchRes = await youtube.search.list({
       part: ["snippet"],
-      channelId,
+      channelId: canonicalId,
       maxResults: maxVideos,
       order: "date",
       type: ["video"],

@@ -49,22 +49,31 @@ function CompareContent() {
 
   async function resolveChannel(query: string): Promise<ChannelDetails | null> {
     if (!query.trim()) return null;
-    // Check if query is 24-char channel ID starting with UC
-    const isId = /^UC[\w-]{22}$/.test(query.trim());
-    if (isId) {
+
+    // 1. Direct channel resolution supporting handles, normal URLs, video links, and IDs
+    try {
       const res = await fetch(`/api/v1/channels/${encodeURIComponent(query.trim())}`);
       const json = await res.json();
       if (json.success && json.data) {
         return json.data;
       }
+    } catch {
+      // Fall through
     }
 
-    // Search channel by name
-    const searchRes = await fetch(`/api/v1/search/channels?q=${encodeURIComponent(query.trim())}&maxResults=1`);
-    const searchJson = await searchRes.json();
-    if (searchJson.success && searchJson.data?.length > 0) {
-      return searchJson.data[0];
+    // 2. Search fallback by channel name
+    try {
+      const searchRes = await fetch(
+        `/api/v1/search/channels?q=${encodeURIComponent(query.trim())}&maxResults=1`
+      );
+      const searchJson = await searchRes.json();
+      if (searchJson.success && searchJson.data?.length > 0) {
+        return searchJson.data[0];
+      }
+    } catch {
+      // Fall through
     }
+
     return null;
   }
 
@@ -153,32 +162,32 @@ function CompareContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
-              Channel A (Name or Channel ID)
+              Channel A (URL, @Handle, or Name)
             </label>
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="e.g. Marques Brownlee or UC..."
+                placeholder="e.g. '@LegendMangaReels', channel URL, or UC..."
                 value={channelAQuery}
                 onChange={(e) => setChannelAQuery(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono text-xs"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
-              Channel B (Name or Channel ID)
+              Channel B (URL, @Handle, or Name)
             </label>
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="e.g. Dave2D or UC..."
+                placeholder="e.g. '@Dave2D', channel URL, or UC..."
                 value={channelBQuery}
                 onChange={(e) => setChannelBQuery(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary font-mono text-xs"
               />
             </div>
           </div>

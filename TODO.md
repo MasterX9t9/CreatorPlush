@@ -89,8 +89,13 @@ Status Key:
   - [x] Unit tests with diverse statistical distributions
 - [x] Channel Analytics
   - [x] Channel overview (real subscribers, view counts, upload frequency)
-  - [x] Historical snapshot tracking
-  - [x] Long-form vs Shorts breakdown
+  - [x] Universal link support (handles `@handle`, `youtube.com/@...`, `youtube.com/channel/UC...`, video links `watch?v=...`, legacy `/c/` and `/user/` URLs)
+  - [x] Upload cadence & consistency rating (weekly upload velocity)
+  - [x] Shorts vs Long-form views comparison & dominance evaluation
+  - [x] Subscriber reach ratio (viral suggested algorithm reach vs core subscriber audience)
+  - [x] Channel specialization & top focus keywords cloud
+  - [x] Interactive filter tabs (All uploads, Outliers only, Long-form, Shorts)
+  - [x] 1-Click Save Channel to Swipe File
 - [x] Video Analytics
   - [x] Video detail intelligence (views/hour, views/subscriber, engagement rate, like-to-view rate, comment rate)
   - [x] Outlier score visualization with expected vs actual baseline

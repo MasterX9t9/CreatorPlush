@@ -152,8 +152,8 @@ function OutliersContent() {
               type="text"
               value={channelInput}
               onChange={(e) => setChannelInput(e.target.value)}
-              placeholder="Enter YouTube Channel ID (e.g. UC_x5XG1OV2P6uZZ5FSM9Ttw)..."
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm shadow-sm"
+              placeholder="Paste YouTube Channel URL (e.g. 'youtube.com/@handle'), @handle, Video link, or Channel ID..."
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-white/10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm shadow-sm font-mono text-xs"
             />
           </div>
           <button

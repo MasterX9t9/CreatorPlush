@@ -155,6 +155,22 @@ function VideoAnalyticsContent() {
     setSwipeError(null);
 
     try {
+      // If user pasted a channel link, resolve channel and pick latest upload
+      if (
+        inputStr.includes("/@") ||
+        inputStr.includes("/channel/") ||
+        inputStr.includes("/c/") ||
+        inputStr.trim().startsWith("@")
+      ) {
+        const chRes = await fetch(
+          `/api/v1/channels/${encodeURIComponent(inputStr.trim())}/analytics`
+        );
+        const chJson = await chRes.json();
+        if (chJson.success && chJson.data?.recentVideos?.length > 0) {
+          targetId = chJson.data.recentVideos[0].id;
+        }
+      }
+
       // If user typed a search phrase instead of an 11-char ID or URL, search first
       const isLikelyId = /^[\w-]{11}$/.test(targetId);
       if (!isLikelyId) {

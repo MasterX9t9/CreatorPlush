@@ -78,12 +78,14 @@ The CreatorPulse REST API adheres to modern HTTP/RESTful design principles:
 - `GET /api/v1/search/similar-videos?videoId=:id`: Retrieve similar videos with explicit similarity scoring explanations.
 
 ### 3.4 Channel Analytics (`/api/v1/channels`)
-- `GET /api/v1/channels/:id`: Get channel overview (subscribers, views, upload count, banner, avatar).
-- `GET /api/v1/channels/:id/analytics`: Comprehensive analytics with official vs estimated breakdown:
-  - Growth trajectory (historical snapshots)
+- `GET /api/v1/channels/:id`: Get channel overview (subscribers, views, upload count, banner, avatar). Accepts handles (`@handle`), channel URLs, video URLs (`watch?v=...`), and channel IDs.
+- `GET /api/v1/channels/:id/analytics`: Comprehensive analytics with official vs calculated breakdown:
+  - Universal URL & handle resolution
   - Median & average views
-  - Long-form vs Shorts performance
-  - Publishing consistency & upload calendar
+  - Shorts vs Long-form performance comparison & dominance ratio
+  - Publishing consistency & upload cadence (weekly velocity)
+  - Subscriber reach ratio & viral algorithmic discovery
+  - Top recurring focus keywords & dominant category
   - Estimated RPM and monthly revenue range
 - `GET /api/v1/channels/:id/videos`: Paginated list of videos for the channel with outlier metrics.
 
