@@ -92,6 +92,7 @@ const navSections: NavSection[] = [
     title: "Settings & System",
     items: [
       { label: "Connected Channels", href: "/settings/youtube", icon: Youtube },
+      { label: "API Keys & BYOK", href: "/settings/api-keys", icon: KeyRound, badge: "BYOK" },
       { label: "Workspace & API", href: "/settings/workspace", icon: Settings },
     ],
   },

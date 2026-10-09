@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 
 export async function GET(
   request: NextRequest,
@@ -22,7 +22,8 @@ export async function GET(
   }
 
   try {
-    const channel = await youtubeProvider.getChannel(channelId);
+    const provider = await getEffectiveYouTubeProvider(request);
+    const channel = await provider.getChannel(channelId);
 
     if (!channel) {
       return NextResponse.json(

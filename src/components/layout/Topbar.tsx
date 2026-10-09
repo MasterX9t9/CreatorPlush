@@ -14,6 +14,7 @@ import {
   User,
   Settings,
   LogIn,
+  Key,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -171,6 +172,14 @@ export function Topbar({
                   >
                     <Youtube className="w-3.5 h-3.5 text-rose-400" />
                     <span>Connected Channels</span>
+                  </Link>
+                  <Link
+                    href="/settings/api-keys"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Key className="w-3.5 h-3.5 text-amber-400" />
+                    <span>API Keys & BYOK</span>
                   </Link>
                 </div>
 

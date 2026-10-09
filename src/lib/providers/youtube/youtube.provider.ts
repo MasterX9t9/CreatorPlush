@@ -2,6 +2,8 @@ import { google } from "googleapis";
 import { AttributedMetric, MetricAttribution, OutlierAnalysis } from "@/lib/types";
 import { calculateExpectedViews, calculateOutlierScore } from "@/lib/algorithms/outliers";
 import { quotaCache, QuotaTracker } from "@/lib/cache/quota-cache";
+import { verifyAuthToken } from "@/lib/auth/jwt";
+import { userKeysRepository } from "@/lib/repositories/user-keys-repository";
 
 export const YOUTUBE_CATEGORIES: Record<string, string> = {
   "1": "Film & Animation",
@@ -127,14 +129,15 @@ export class YouTubeProvider {
   }
 
   private getClient() {
-    if (!this.apiKey) {
+    const key = this.apiKey || process.env.YOUTUBE_API_KEY || "";
+    if (!key) {
       throw new Error(
-        "YouTube API Key is missing. Set YOUTUBE_API_KEY in your environment variables to query official YouTube data."
+        "YouTube API Key is missing. Please configure your YouTube Data API key in Settings > API Keys to query YouTube data."
       );
     }
     return google.youtube({
       version: "v3",
-      auth: this.apiKey,
+      auth: key,
     });
   }
 
@@ -803,3 +806,45 @@ export class YouTubeProvider {
 }
 
 export const youtubeProvider = new YouTubeProvider();
+
+/**
+ * Resolves the effective YouTube API key for a request:
+ * 1. Checks 'x-youtube-api-key' request header (from browser client state)
+ * 2. Checks active authenticated user's saved encrypted key in userKeysRepository
+ * 3. Falls back to process.env.YOUTUBE_API_KEY
+ */
+export async function resolveYouTubeApiKey(request?: Request): Promise<string | undefined> {
+  if (!request) return undefined;
+  try {
+    const headerKey = request.headers.get("x-youtube-api-key");
+    if (headerKey && headerKey.trim()) {
+      return headerKey.trim();
+    }
+
+    const cookieHeader = request.headers.get("cookie") || "";
+    if (cookieHeader.includes("cp_session=")) {
+      const match = cookieHeader.match(/cp_session=([^;]+)/);
+      if (match && match[1]) {
+        const payload = verifyAuthToken(match[1]);
+        if (payload?.userId) {
+          const userKey = await userKeysRepository.getRawKey(payload.userId, "youtube");
+          if (userKey) {
+            return userKey;
+          }
+        }
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return undefined;
+}
+
+export async function getEffectiveYouTubeProvider(request?: Request): Promise<YouTubeProvider> {
+  const customKey = await resolveYouTubeApiKey(request);
+  if (customKey) {
+    return new YouTubeProvider(customKey);
+  }
+  return youtubeProvider;
+}
+

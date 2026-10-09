@@ -193,6 +193,13 @@ Status Key:
 - [x] External REST API
   - [x] API key generation (SHA-256 hashing) and revocation (`/api/v1/keys`, `/api/v1/keys/[id]`)
   - [x] Rate-limited `/api/v1/...` endpoints with sliding window
+- [x] Bring-Your-Own-Key (BYOK) User Credentials System
+  - [x] AES-256-GCM encrypted persistence repository for user-supplied keys (`src/lib/repositories/user-keys-repository.ts`)
+  - [x] Live quota-friendly probe validator for YouTube Data API v3 & AI providers (`/api/v1/user/keys/validate`)
+  - [x] User keys management API endpoints (`GET`, `POST`, `DELETE` at `/api/v1/user/keys`)
+  - [x] Dynamic YouTube provider runtime resolution via HTTP headers & user session (`resolveYouTubeApiKey`)
+  - [x] Dedicated UI page (`/settings/api-keys`) with show/hide password toggle, live test probe, activation button, and step-by-step Google Cloud guide
+  - [x] Sidebar and Topbar navigation integration
 - [x] Webhook Dispatcher
   - [x] Cryptographic HMAC signature generation and delivery (`src/lib/webhooks/dispatcher.ts`, `/api/v1/webhooks`, `/api/v1/webhooks/[id]`)
 - [x] Background Workers

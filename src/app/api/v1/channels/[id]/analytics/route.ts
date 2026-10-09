@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { youtubeProvider } from "@/lib/providers/youtube/youtube.provider";
+import { getEffectiveYouTubeProvider } from "@/lib/providers/youtube/youtube.provider";
 import { estimateRevenueRange } from "@/lib/algorithms/revenue";
 import { evaluateChannelMonetization } from "@/lib/algorithms/monetization";
 import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
@@ -45,8 +45,9 @@ export async function GET(
   }
 
   try {
+    const provider = await getEffectiveYouTubeProvider(request);
     // 1. Resolve authentic channel profile using resilient URL/handle parsing
-    const channel = await youtubeProvider.getChannel(channelInput);
+    const channel = await provider.getChannel(channelInput);
     if (!channel) {
       return NextResponse.json(
         {
@@ -63,7 +64,7 @@ export async function GET(
 
     // 2. Fetch recent videos with canonical channel.id and compute outliers
     const { videos, channelMedianViews } =
-      await youtubeProvider.getChannelVideosWithOutliers(channel.id, 30);
+      await provider.getChannelVideosWithOutliers(channel.id, 30);
 
     const shorts = videos.filter((v) => v.isShort);
     const longForm = videos.filter((v) => !v.isShort);
