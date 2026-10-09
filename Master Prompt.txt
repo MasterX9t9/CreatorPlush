@@ -1,0 +1,2104 @@
+# MASTER BUILD PROMPT
+
+## YouTube Creator Intelligence, Research & Automation Platform
+
+You are a senior full-stack architect, UI/UX designer, data engineer, browser-extension engineer, YouTube API engineer, AI engineer, DevOps engineer, QA engineer, and security engineer.
+
+Build a production-ready SaaS web application for YouTube creators.
+
+The product should provide an original, legally compliant alternative to modern YouTube creator intelligence platforms.
+
+DO NOT copy another company's source code, branding, proprietary UI, proprietary algorithms, private APIs, authentication tokens, or copyrighted assets.
+
+Build everything from scratch using public/authorized data sources and official APIs wherever possible.
+
+The application must have REAL FUNCTIONALITY.
+
+NO fake buttons.
+NO fake analytics.
+NO placeholder dashboards pretending to work.
+NO hardcoded fake YouTube statistics.
+NO "coming soon" functionality unless explicitly marked as an unfinished development item.
+NO mock API responses in production.
+NO UI controls that do nothing.
+
+Every major feature must connect to a real backend service, database, API, browser-extension capability, or clearly documented limitation.
+
+---
+
+# 1. PRODUCT VISION
+
+Create an all-in-one YouTube Creator Intelligence platform that helps creators:
+
+* Research YouTube channels
+* Analyze videos
+* Discover niches
+* Find competitors
+* Discover similar channels
+* Find viral/outlier videos
+* Analyze Shorts
+* Research keywords
+* Analyze thumbnails
+* Analyze titles
+* Analyze comments
+* Analyze audience information
+* Estimate revenue
+* Track channels over time
+* Compare channels
+* Manage multiple channels
+* Build swipe files
+* Save research
+* Generate content ideas
+* Analyze content opportunities
+* Forecast channel performance
+* Analyze sponsorship opportunities
+* Create reports
+* Automate recurring research
+* Use AI to interpret YouTube data
+* Use a browser extension directly inside YouTube
+
+The product consists of:
+
+1. Web SaaS Dashboard
+2. YouTube Research Engine
+3. Analytics Engine
+4. Niche Intelligence Engine
+5. AI Intelligence Layer
+6. Swipe File
+7. Channel Tracker
+8. Reporting System
+9. Browser Extension
+10. API
+11. Automation System
+12. Authentication and subscription system
+13. Admin dashboard
+
+---
+
+# 2. RECOMMENDED ARCHITECTURE
+
+Use a modern production architecture.
+
+Frontend:
+
+* Next.js
+* TypeScript
+* React
+* Tailwind CSS
+* shadcn/ui
+* Recharts or equivalent chart library
+* TanStack Query
+* Zustand where appropriate
+
+Backend:
+
+* Next.js API routes/server actions OR separate NestJS backend
+* TypeScript
+* PostgreSQL
+* Prisma ORM
+* Redis
+* background workers
+
+Infrastructure:
+
+* Docker
+* Docker Compose for local development
+* production-ready environment variables
+* object storage for screenshots/images/reports
+* scheduled workers
+* queue system
+
+Authentication:
+
+* email/password
+* Google OAuth
+* secure sessions
+* email verification
+* password reset
+* optional 2FA
+
+Payments:
+
+* Stripe architecture
+* subscription plans
+* usage limits
+* usage metering
+* billing portal
+* webhook processing
+
+Browser Extension:
+
+* Chrome Manifest V3
+* TypeScript
+* React where useful
+* content scripts
+* background service worker
+* side panel
+* secure communication with backend
+
+The architecture must allow future support for:
+
+* Firefox
+* Edge
+* Brave
+* additional AI providers
+* additional data providers
+
+---
+
+# 3. CORE WEB APP
+
+Create a polished SaaS dashboard.
+
+Design philosophy:
+
+* clean
+* premium
+* fast
+* information dense without feeling cluttered
+* creator-focused
+* responsive
+* desktop first but fully mobile responsive
+* dark/light mode
+* accessible
+* keyboard friendly
+
+Main navigation:
+
+Dashboard
+
+Research
+
+* YouTube Search
+* Channel Search
+* Video Search
+* Shorts Search
+* Similar Channels
+* Similar Videos
+* Outlier Videos
+* Keyword Research
+* Niche Finder
+
+Analytics
+
+* Channel Analytics
+* Video Analytics
+* Shorts Analytics
+* Audience Analytics
+* Revenue Analytics
+* Competitor Analytics
+* Channel Comparison
+* Combined Channels
+* Historical Tracking
+
+Content Intelligence
+
+* Content Ideas
+* Topic Opportunities
+* Viral Opportunities
+* Title Analyzer
+* Thumbnail Analyzer
+* Thumbnail Tester
+* Comment Sentiment
+* Transcript Analyzer
+* Content Gap Finder
+
+Library
+
+* Swipe File
+* Saved Channels
+* Saved Videos
+* Saved Thumbnails
+* Saved Searches
+* Collections
+* Notes
+
+Tracking
+
+* Channel Tracker
+* Competitor Tracker
+* Keyword Tracker
+* Trend Tracker
+* Alerts
+
+Monetization
+
+* RPM Analysis
+* Revenue Estimates
+* Sponsorship Research
+* Monetization Checks
+
+AI
+
+* AI Research Assistant
+* AI Channel Analyst
+* AI Content Strategist
+* AI Niche Analyst
+* AI Competitor Analyst
+
+Automation
+
+* Scheduled Reports
+* Alerts
+* Workflow Automation
+* API
+* Webhooks
+
+Settings
+
+* Profile
+* Connected YouTube Accounts
+* Workspace
+* Team
+* Billing
+* API Keys
+* Usage
+* Notifications
+* Security
+
+---
+
+# 4. DASHBOARD
+
+Create a useful dashboard instead of a collection of decorative cards.
+
+Dashboard should show:
+
+* connected channels
+* total subscribers
+* total views
+* views growth
+* subscriber growth
+* estimated revenue
+* RPM
+* average views
+* upload frequency
+* top videos
+* recent videos
+* Shorts performance
+* channel health
+* competitors
+* trending opportunities
+* saved research
+* alerts
+
+Allow date ranges:
+
+* 7 days
+* 28 days
+* 90 days
+* 365 days
+* custom
+
+All metrics must clearly identify whether they are:
+
+* official YouTube data
+* calculated
+* estimated
+* AI-derived
+
+Never present estimates as official numbers.
+
+---
+
+# 5. YOUTUBE SEARCH ENGINE
+
+Implement advanced YouTube search.
+
+Filters:
+
+* keyword
+* channel
+* title
+* date
+* duration
+* views
+* subscribers
+* views/subscriber ratio
+* views/hour
+* engagement
+* likes
+* comments
+* Shorts
+* long-form
+* category
+* language
+* country where available
+
+Sorting:
+
+* relevance
+* views
+* newest
+* engagement
+* views/hour
+* growth
+* outlier score
+
+Result cards should contain:
+
+* thumbnail
+* title
+* channel
+* subscribers
+* views
+* upload date
+* duration
+* engagement
+* estimated metrics where applicable
+* outlier score
+* save button
+* open YouTube button
+* analyze button
+
+Pagination/infinite scrolling must work.
+
+---
+
+# 6. CHANNEL DISCOVERY
+
+Implement channel discovery.
+
+Search channels by:
+
+* keyword
+* niche
+* category
+* subscriber range
+* views range
+* country
+* language
+* upload frequency
+* channel age where available
+* long-form focus
+* Shorts focus
+* faceless likelihood
+* growth rate
+
+Channel cards:
+
+* avatar
+* channel name
+* handle
+* subscribers
+* views
+* videos
+* average views
+* upload frequency
+* estimated RPM/revenue
+* growth
+* outlier percentage
+* content type
+
+Allow:
+
+* compare
+* track
+* save
+* add to swipe file
+* analyze
+* export
+
+---
+
+# 7. CHANNEL ANALYTICS
+
+Build a comprehensive channel analytics page.
+
+Sections:
+
+Overview
+
+Growth
+
+Content
+
+Videos
+
+Shorts
+
+Audience
+
+Geography
+
+Revenue
+
+Engagement
+
+Publishing
+
+Competitors
+
+Historical Data
+
+Display:
+
+* subscriber growth
+* view growth
+* upload frequency
+* average views
+* median views
+* best videos
+* worst videos
+* outlier videos
+* views per upload
+* Shorts vs long-form
+* estimated RPM
+* estimated revenue
+* engagement rate
+* average video duration
+* publishing consistency
+
+Charts must use real stored historical snapshots where available.
+
+---
+
+# 8. VIDEO ANALYTICS
+
+For each video provide:
+
+* title
+* thumbnail
+* channel
+* upload date
+* views
+* likes
+* comments
+* duration
+* engagement rate
+* views/day
+* views/hour
+* views/subscriber
+* outlier score
+* estimated revenue
+* estimated RPM
+* transcript availability
+* subtitles
+* thumbnail analysis
+* title analysis
+* comments analysis
+
+Create a detailed video intelligence page.
+
+---
+
+# 9. SHORTS ANALYTICS
+
+Dedicated Shorts research.
+
+Show:
+
+* Shorts views
+* likes
+* comments
+* upload frequency
+* average Shorts views
+* best Shorts
+* Shorts growth
+* Shorts vs long-form comparison
+* outlier Shorts
+* duration distribution
+* topic distribution
+
+Allow filtering Shorts by:
+
+* views
+* date
+* channel
+* niche
+* duration
+* engagement
+
+---
+
+# 10. SIMILAR CHANNEL ENGINE
+
+Create a recommendation engine for similar channels.
+
+Inputs:
+
+* channel
+* niche
+* keyword
+* content topics
+
+Calculate similarity using:
+
+* topic similarity
+* titles
+* descriptions
+* categories
+* video subjects
+* publishing patterns
+* audience signals where available
+
+Return:
+
+* highly similar
+* moderately similar
+* emerging competitors
+* adjacent competitors
+
+Do not simply copy a competitor's content.
+
+---
+
+# 11. SIMILAR VIDEO ENGINE
+
+Given a YouTube video:
+
+Find related videos using:
+
+* semantic topic similarity
+* title similarity
+* channel niche
+* metadata
+* categories
+* transcript similarity when legally available
+* visual/thumbnail similarity where permitted
+
+Show similarity score and explain why each result was selected.
+
+---
+
+# 12. OUTLIER DETECTION
+
+Build a real statistical outlier engine.
+
+Example:
+
+Expected views =
+median views for comparable videos
+
+Outlier score =
+actual views / expected views
+
+Also account for:
+
+* channel size
+* video age
+* format
+* Shorts vs long-form
+* upload frequency
+* niche
+* duration
+
+Display:
+
+* 2x
+* 5x
+* 10x
+* 20x+
+  outliers
+
+Allow custom thresholds.
+
+Do not use a fake "AI score."
+
+---
+
+# 13. NICHE FINDER
+
+Build a complete niche discovery system.
+
+Users can enter:
+
+* niche
+* keyword
+* category
+* audience
+* language
+
+Return:
+
+* niche size
+* competition
+* average views
+* average subscribers
+* upload volume
+* growth signals
+* monetization potential
+* estimated RPM
+* content opportunities
+* top channels
+* emerging channels
+* outlier videos
+* recommended sub-niches
+
+Create a Niche Opportunity Score based on transparent weighted metrics.
+
+Show the formula.
+
+Never pretend that a prediction is guaranteed.
+
+---
+
+# 14. KEYWORD RESEARCH
+
+Build keyword research.
+
+For each keyword:
+
+* search interest where authorized data exists
+* YouTube result count where measurable
+* competition
+* top channels
+* top videos
+* average views
+* average subscribers
+* opportunity score
+* related keywords
+* long-tail keywords
+* content suggestions
+
+Allow:
+
+* keyword lists
+* CSV export
+* saved keywords
+* keyword tracking
+
+---
+
+# 15. CONTENT GAP ANALYSIS
+
+Compare:
+
+User channel
+VS
+Competitor channels
+
+Find:
+
+* topics competitors cover but user does not
+* topics with unusually high views
+* recurring successful formats
+* missing subtopics
+* under-served keywords
+* Shorts opportunities
+* long-form opportunities
+
+Generate actionable recommendations.
+
+---
+
+# 16. TITLE ANALYZER
+
+Build title analysis.
+
+Analyze:
+
+* length
+* emotional language
+* curiosity
+* clarity
+* keyword placement
+* specificity
+* repetition
+* click potential
+* title patterns
+
+Return:
+
+* score
+* strengths
+* weaknesses
+* alternative titles
+* explanation
+
+Do not claim that the score predicts CTR exactly.
+
+---
+
+# 17. THUMBNAIL ANALYZER
+
+Build thumbnail intelligence.
+
+Analyze:
+
+* subject clarity
+* contrast
+* composition
+* text density
+* focal point
+* face visibility
+* emotional expression
+* color separation
+* mobile readability
+* visual hierarchy
+
+Provide:
+
+* score
+* issues
+* improvement suggestions
+* alternative concepts
+
+---
+
+# 18. THUMBNAIL TESTER
+
+Create a thumbnail/title preview environment.
+
+Allow users to upload:
+
+* thumbnail
+* title
+
+Render previews resembling YouTube browsing surfaces without copying YouTube's proprietary UI assets.
+
+Preview:
+
+* homepage-style card
+* search result
+* recommended-video card
+* channel page
+
+Allow multiple variants:
+
+A
+B
+C
+D
+
+Compare them visually.
+
+Do NOT claim actual CTR unless connected to genuine experiment data.
+
+---
+
+# 19. COMMENT SENTIMENT ANALYSIS
+
+Allow users to analyze publicly accessible video comments where permitted.
+
+Show:
+
+* positive %
+* neutral %
+* negative %
+* common topics
+* recurring complaints
+* viewer requests
+* questions
+* emotional themes
+* content opportunities
+
+AI should summarize comments.
+
+Provide sample comment references rather than copying large amounts of copyrighted content.
+
+---
+
+# 20. TRANSCRIPT INTELLIGENCE
+
+Where transcripts are legally and technically available:
+
+Allow:
+
+* transcript viewing
+* transcript search
+* copy
+* summary
+* chapter generation
+* topic extraction
+* hook extraction
+* structure analysis
+* key points
+* content gap analysis
+
+Support subtitle formats:
+
+* SRT
+* VTT
+* TXT
+
+---
+
+# 21. AUDIENCE ANALYTICS
+
+Where official authorized data is available, display:
+
+* geography
+* age ranges
+* gender
+* watch behavior
+* audience overlap
+* returning viewers
+* new viewers
+
+Clearly distinguish:
+
+OFFICIAL CREATOR DATA
+
+from:
+
+ESTIMATED PUBLIC DATA.
+
+Never fabricate private audience data.
+
+---
+
+# 22. REVENUE / RPM ENGINE
+
+Create revenue estimation.
+
+Inputs:
+
+* views
+* geography
+* niche
+* video format
+* estimated RPM
+* monetization status
+
+Outputs:
+
+* estimated daily revenue
+* estimated monthly revenue
+* estimated annual revenue
+* RPM range
+* CPM range where applicable
+
+Use ranges rather than false precision.
+
+Example:
+
+Estimated monthly revenue:
+$1,200–$2,100
+
+Not:
+
+$1,643.72
+
+unless actual creator revenue data is available.
+
+---
+
+# 23. MONETIZATION CHECK
+
+Create a monetization analysis page.
+
+Show publicly observable indicators where possible.
+
+Allow:
+
+* channel monetization analysis
+* video monetization indicators
+* monetization likelihood
+* limitations/confidence
+
+Clearly label this as an estimate unless official creator data is available.
+
+---
+
+# 24. SPONSORSHIP ANALYSIS
+
+Create sponsorship intelligence.
+
+Analyze public information such as:
+
+* channel niche
+* audience size
+* engagement
+* posting frequency
+* public sponsor mentions
+* sponsor categories
+* brand fit
+
+Display:
+
+* potential sponsor categories
+* estimated sponsorship attractiveness
+* recent sponsorship signals
+* contact information ONLY when publicly and legitimately available
+
+Never scrape private personal information.
+
+---
+
+# 25. SWIPE FILE
+
+Build a powerful research library.
+
+Users can save:
+
+* videos
+* channels
+* thumbnails
+* titles
+* Shorts
+* searches
+* keywords
+* notes
+
+Features:
+
+* folders
+* tags
+* notes
+* favorites
+* search
+* filters
+* sorting
+* drag/drop
+* bulk actions
+* sharing
+* team access
+
+Example folders:
+
+* Viral Hooks
+* Great Thumbnails
+* Competitors
+* Shorts Ideas
+* Titles
+* Storytelling
+* Psychology
+* Minecraft
+* AI Content
+
+---
+
+# 26. CHANNEL TRACKER
+
+Users can track channels.
+
+For every tracked channel:
+
+Store periodic snapshots.
+
+Track:
+
+* subscribers
+* views
+* uploads
+* average views
+* Shorts
+* growth
+* outliers
+
+Create alerts:
+
+"Channel gained 10K subscribers."
+
+"New video exceeded 5x channel average."
+
+"Competitor uploaded."
+
+"Competitor entered your niche."
+
+---
+
+# 27. KEYWORD TRACKER
+
+Track selected keywords.
+
+Periodic checks:
+
+* ranking changes
+* new videos
+* emerging channels
+* viral videos
+* competition changes
+
+Create historical charts.
+
+---
+
+# 28. COMBINED CHANNEL ANALYTICS
+
+Allow users to connect multiple channels.
+
+Example:
+
+Channel A
+Channel B
+Channel C
+
+Combined dashboard:
+
+* total subscribers
+* total views
+* combined estimated revenue
+* upload count
+* average performance
+* growth
+
+Also allow individual channel filtering.
+
+---
+
+# 29. CHANNEL FORECASTING
+
+Build forecasting using real historical data.
+
+Forecast:
+
+* subscriber trajectory
+* views
+* uploads
+* revenue ranges
+
+Use:
+
+* moving averages
+* regression
+* seasonal adjustments where enough data exists
+
+Display confidence ranges.
+
+Never promise future performance.
+
+---
+
+# 30. AI CREATOR ASSISTANT
+
+Build an AI assistant that understands the user's research data.
+
+Capabilities:
+
+"Analyze this channel."
+
+"Find competitors."
+
+"Why did this video perform?"
+
+"Find content gaps."
+
+"Give me 20 video ideas."
+
+"Find low-competition opportunities."
+
+"Analyze these 50 videos."
+
+"Compare these channels."
+
+"Find patterns in these thumbnails."
+
+"Explain why these videos became outliers."
+
+"Build a content strategy."
+
+AI must use actual retrieved data.
+
+Never invent statistics.
+
+Every AI answer involving data must provide data references.
+
+---
+
+# 31. AI CONTENT STRATEGIST
+
+Input:
+
+* channel
+* niche
+* audience
+* goals
+
+Generate:
+
+* content pillars
+* topic ideas
+* titles
+* formats
+* upload strategy
+* Shorts ideas
+* long-form ideas
+* content gaps
+* competitor strategy
+
+Separate:
+
+DATA FINDINGS
+
+from
+
+AI RECOMMENDATIONS.
+
+---
+
+# 32. BROWSER EXTENSION
+
+Build a Chrome extension.
+
+Manifest V3.
+
+The extension should enhance YouTube pages.
+
+Supported surfaces:
+
+* homepage
+* search
+* watch page
+* channel page
+* Shorts
+* subscription feed where technically possible
+
+Extension capabilities:
+
+* channel analytics overlay
+* video analytics
+* Shorts analytics
+* similar channels
+* similar videos
+* outlier indicators
+* advanced filters
+* thumbnail preview
+* thumbnail download where permitted
+* transcript tools
+* comment sentiment
+* save to swipe file
+* screenshot tools
+* channel tracking
+* title analysis
+* thumbnail analysis
+
+Use a side panel where appropriate.
+
+Never break the YouTube page.
+
+Use resilient DOM selectors.
+
+Expect YouTube UI changes.
+
+---
+
+# 33. ADVANCED YOUTUBE FILTERS
+
+Implement extension filters.
+
+Homepage:
+
+* minimum views
+* maximum views
+* minimum subscribers
+* maximum subscribers
+* upload date
+* video duration
+* Shorts
+* channel
+* niche
+
+Search:
+
+* views
+* subscribers
+* date
+* duration
+* channel
+* engagement
+
+Subscriptions:
+
+* recent
+* views
+* channel size
+* duration
+
+Filtering should actually modify visible results.
+
+---
+
+# 34. SCREENSHOT SYSTEM
+
+Allow users to capture:
+
+* video frame
+* thumbnail
+* channel header
+* selected area
+
+Provide:
+
+* crop
+* resize
+* download
+* copy
+* save to swipe file
+
+Respect copyright and user rights.
+
+Do not automatically redistribute copyrighted material.
+
+---
+
+# 35. DATA INGESTION
+
+Primary data sources should use:
+
+* YouTube Data API
+* YouTube Analytics API for authorized connected channels
+* YouTube OAuth
+* publicly available data
+* user-provided data
+* approved third-party data providers where necessary
+
+Never rely on unauthorized scraping when an official API is available.
+
+Build provider abstraction:
+
+YouTubeProvider
+AnalyticsProvider
+SearchProvider
+TranscriptProvider
+ThumbnailProvider
+
+This allows replacement providers later.
+
+---
+
+# 36. DATA CACHE
+
+Use Redis caching.
+
+Cache:
+
+* channel data
+* video data
+* search results
+* thumbnails metadata
+* analytics snapshots
+
+Use TTLs appropriate to each dataset.
+
+Avoid excessive YouTube API usage.
+
+Implement:
+
+* request deduplication
+* batching
+* retries
+* exponential backoff
+* rate-limit handling
+
+---
+
+# 37. DATABASE
+
+Use PostgreSQL.
+
+Core entities:
+
+User
+Workspace
+TeamMember
+Subscription
+UsageRecord
+
+YouTubeAccount
+Channel
+ChannelSnapshot
+Video
+VideoSnapshot
+Short
+Keyword
+KeywordSnapshot
+Niche
+Search
+SearchResult
+
+Competitor
+TrackedChannel
+TrackedKeyword
+
+SwipeFolder
+SwipeItem
+SwipeTag
+SwipeNote
+
+Thumbnail
+ThumbnailAnalysis
+TitleAnalysis
+
+CommentAnalysis
+Transcript
+TranscriptAnalysis
+
+Alert
+Notification
+
+Report
+ReportSchedule
+
+ApiKey
+Webhook
+Automation
+
+AIConversation
+AIMessage
+AIAnalysis
+
+AuditLog
+
+All tables must have:
+
+* proper indexes
+* timestamps
+* foreign keys
+* soft-delete where appropriate
+* tenant/workspace isolation
+
+---
+
+# 38. MULTI-TENANT ARCHITECTURE
+
+Every workspace must be isolated.
+
+User A must NEVER access:
+
+User B's:
+
+* channels
+* reports
+* swipe files
+* API keys
+* analytics
+* team data
+
+Implement authorization at backend level.
+
+Do not rely only on frontend hiding.
+
+---
+
+# 39. TEAM SYSTEM
+
+Allow:
+
+Owner
+Admin
+Editor
+Analyst
+Viewer
+
+Permissions:
+
+* manage workspace
+* manage billing
+* manage channels
+* run research
+* edit swipe files
+* create reports
+* manage API
+* manage users
+
+---
+
+# 40. REPORT GENERATOR
+
+Generate reports:
+
+* channel report
+* competitor report
+* niche report
+* keyword report
+* weekly performance
+* monthly performance
+
+Export:
+
+* PDF
+* CSV
+* JSON
+
+Reports should contain:
+
+* charts
+* tables
+* explanations
+* methodology
+* data timestamps
+
+---
+
+# 41. AUTOMATION
+
+Allow users to schedule:
+
+Daily
+
+Weekly
+
+Monthly
+
+Examples:
+
+"Every Monday analyze my competitors."
+
+"Every morning find new viral videos in my niche."
+
+"Every Friday send channel report."
+
+"Alert me when a competitor gets a 10x outlier."
+
+Automation engine:
+
+Scheduler
+→ Queue
+→ Worker
+→ Data provider
+→ Analysis
+→ Notification
+
+Notifications:
+
+* in-app
+* email
+* webhook
+
+---
+
+# 42. API
+
+Create a secure REST API.
+
+Endpoints should include:
+
+/channels
+/videos
+/search
+/niches
+/keywords
+/analytics
+/outliers
+/competitors
+/swipefile
+/reports
+/alerts
+/ai
+
+Support:
+
+* API keys
+* rate limits
+* pagination
+* filtering
+* sorting
+* webhooks
+* usage tracking
+
+Create OpenAPI documentation.
+
+---
+
+# 43. WEBHOOKS
+
+Events:
+
+channel.updated
+video.detected
+outlier.detected
+keyword.changed
+competitor.updated
+report.generated
+alert.triggered
+
+Allow users to configure webhook endpoints.
+
+Sign webhook payloads securely.
+
+---
+
+# 44. ADMIN PANEL
+
+Admin dashboard:
+
+* users
+* workspaces
+* subscriptions
+* API usage
+* YouTube API usage
+* errors
+* jobs
+* queue status
+* failed jobs
+* system health
+* feature usage
+* abuse monitoring
+
+Allow:
+
+* suspend user
+* inspect workspace
+* reset usage
+* inspect errors
+* manage plans
+
+Never expose user secrets.
+
+---
+
+# 45. BILLING
+
+Create plans such as:
+
+Free
+Creator
+Pro
+Agency
+
+Each plan can control:
+
+* tracked channels
+* searches
+* analytics requests
+* AI requests
+* reports
+* automations
+* API calls
+* team members
+
+Implement actual Stripe webhooks.
+
+Never trust frontend subscription state.
+
+---
+
+# 46. SECURITY
+
+Implement:
+
+* HTTPS
+* secure cookies
+* CSRF protection where applicable
+* XSS protection
+* SQL injection prevention
+* rate limiting
+* API key hashing
+* encryption for sensitive credentials
+* OAuth token encryption
+* audit logs
+* permission checks
+* secure headers
+
+Never store OAuth tokens in plaintext.
+
+Never expose API keys to the browser.
+
+---
+
+# 47. PERFORMANCE
+
+Target:
+
+Dashboard initial load:
+< 2 seconds where practical
+
+API:
+fast cached responses
+
+Large lists:
+server pagination
+
+Charts:
+lazy loaded
+
+Images:
+optimized
+
+Heavy AI/data jobs:
+background workers
+
+Never block the main request while performing large analysis.
+
+---
+
+# 48. ERROR HANDLING
+
+Every API call must handle:
+
+* timeout
+* rate limit
+* unauthorized
+* quota exceeded
+* invalid channel
+* deleted video
+* private video
+* unavailable transcript
+* API outage
+
+Display useful messages.
+
+Example:
+
+"Transcript unavailable for this video."
+
+NOT:
+
+"Something went wrong."
+
+---
+
+# 49. DATA QUALITY
+
+Every metric must have metadata:
+
+source
+timestamp
+confidence
+estimated/official flag
+
+Example:
+
+{
+"metric": "estimatedRevenue",
+"value": 1200,
+"currency": "USD",
+"type": "estimated",
+"confidence": 0.72,
+"calculatedAt": "..."
+}
+
+---
+
+# 50. AI SAFETY AGAINST HALLUCINATION
+
+AI must NEVER invent:
+
+* subscriber counts
+* revenue
+* views
+* RPM
+* demographics
+* rankings
+* API results
+
+If data isn't available:
+
+Say:
+
+"Data unavailable."
+
+If estimated:
+
+Say:
+
+"Estimated."
+
+If calculated:
+
+Say:
+
+"Calculated from available public data."
+
+---
+
+# 51. ORIGINAL BRANDING
+
+Do not call the product NexLev.
+
+Create a new brand.
+
+Temporary working name:
+
+"CreatorPulse"
+
+Design a distinctive identity.
+
+Do not copy NexLev's:
+
+* logo
+* colors
+* exact UI
+* exact wording
+* proprietary visual assets
+
+The final product should feel like an independent premium SaaS.
+
+---
+
+# 52. UX REQUIREMENTS
+
+Every page must answer:
+
+"What can I do here?"
+
+Avoid overwhelming users.
+
+Provide:
+
+* onboarding
+* tooltips
+* empty states
+* examples
+* loading states
+* error states
+* success states
+
+Use skeleton loading instead of blank screens.
+
+---
+
+# 53. ONBOARDING
+
+First login:
+
+Step 1:
+Create workspace.
+
+Step 2:
+Connect YouTube account.
+
+Step 3:
+Select niche.
+
+Step 4:
+Add competitors.
+
+Step 5:
+Select goals.
+
+Step 6:
+Dashboard automatically populates.
+
+Provide sample/demo mode ONLY if clearly labeled:
+
+"Demo Data"
+
+Never mix demo data with real data.
+
+---
+
+# 54. MOBILE
+
+Responsive web app.
+
+Mobile navigation:
+
+Dashboard
+Research
+Analytics
+Library
+Alerts
+Profile
+
+Tables should transform into cards.
+
+Charts must remain readable.
+
+---
+
+# 55. INTERNATIONALIZATION
+
+Prepare architecture for:
+
+English
+Khmer
+
+All UI strings must use translation keys.
+
+Do not hardcode UI text directly into components.
+
+Currency:
+
+USD
+KHR
+
+Date/time localization must be supported.
+
+---
+
+# 56. TESTING
+
+Write real tests.
+
+Unit tests:
+
+* calculations
+* outlier algorithms
+* revenue estimation
+* permissions
+* filters
+
+Integration tests:
+
+* YouTube provider
+* database
+* authentication
+* billing
+* queues
+
+E2E:
+
+* signup
+* login
+* connect YouTube
+* search
+* channel analysis
+* save swipe item
+* create report
+* create alert
+* extension communication
+
+Browser extension tests must be included.
+
+---
+
+# 57. DEVELOPMENT WORKFLOW
+
+Before coding:
+
+1. Inspect repository.
+2. Create architecture.
+3. Create database schema.
+4. Create environment configuration.
+5. Create TODO.md.
+6. Create ARCHITECTURE.md.
+7. Create DATABASE.md.
+8. Create API documentation.
+9. Create TESTING.md.
+10. Create AGENTS.md.
+
+Then build phase-by-phase.
+
+Do not attempt to generate the entire application in one giant uncontrolled operation.
+
+---
+
+# 58. PHASES
+
+PHASE 1
+Foundation
+
+* repository
+* architecture
+* authentication
+* database
+* UI system
+* workspace
+
+PHASE 2
+YouTube integration
+
+* OAuth
+* API client
+* channel
+* videos
+* search
+
+PHASE 3
+Analytics
+
+* channel analytics
+* video analytics
+* Shorts
+* historical snapshots
+
+PHASE 4
+Research
+
+* similar channels
+* similar videos
+* outliers
+* niche
+* keywords
+
+PHASE 5
+Content intelligence
+
+* titles
+* thumbnails
+* transcripts
+* comments
+* AI
+
+PHASE 6
+Swipe file
+
+* folders
+* tags
+* notes
+* sharing
+
+PHASE 7
+Tracking
+
+* channels
+* competitors
+* keywords
+* alerts
+
+PHASE 8
+Reports
+
+* dashboards
+* PDF
+* CSV
+* scheduled reports
+
+PHASE 9
+Browser extension
+
+* Manifest V3
+* content scripts
+* side panel
+* YouTube integration
+* filters
+* analytics overlays
+
+PHASE 10
+Automation/API
+
+* API keys
+* webhooks
+* scheduler
+* worker system
+
+PHASE 11
+Billing
+
+* Stripe
+* plans
+* quotas
+* usage
+
+PHASE 12
+Production
+
+* security
+* performance
+* monitoring
+* backups
+* deployment
+* QA
+
+---
+
+# 59. DEFINITION OF DONE
+
+A feature is NOT complete because:
+
+* the button exists
+* the page looks nice
+* mock data appears
+* an API function exists but isn't connected
+* a placeholder response appears
+
+A feature is complete only when:
+
+1. UI exists.
+2. Backend exists.
+3. Database integration exists where required.
+4. Real API/provider integration exists.
+5. Loading state works.
+6. Error state works.
+7. Empty state works.
+8. Permission checks work.
+9. Tests exist.
+10. The feature works end-to-end.
+
+---
+
+# 60. DEVELOPMENT AGENT RULES
+
+You are forbidden from:
+
+* creating fake functionality
+* hardcoding analytics
+* hiding errors
+* pretending an API works
+* creating placeholder buttons
+* silently ignoring failed requests
+* using fake "AI" responses
+* using random numbers as analytics
+* claiming unsupported metrics are official
+* skipping authentication
+* skipping authorization
+* exposing API keys
+* storing OAuth tokens insecurely
+* deleting working functionality without reason
+* rewriting the entire project unnecessarily
+
+When a requested feature cannot legally or technically be implemented:
+
+1. Explain the limitation.
+2. Identify the correct official API/data source.
+3. Implement the closest legitimate alternative.
+4. Clearly label the limitation in the UI.
+5. Continue building the rest of the system.
+
+---
+
+# 61. FINAL QUALITY BAR
+
+The final application should feel like a serious commercial SaaS product.
+
+It must be:
+
+FAST
+STABLE
+RESPONSIVE
+SECURE
+DATA-DRIVEN
+SCALABLE
+MAINTAINABLE
+TESTED
+
+Do not optimize for:
+
+"number of pages."
+
+Optimize for:
+
+"number of genuinely working workflows."
+
+A user should be able to enter the application and realistically perform this workflow:
+
+Connect YouTube
+→ Search niche
+→ Discover competitors
+→ Analyze channels
+→ Find outlier videos
+→ Analyze videos
+→ Analyze titles
+→ Analyze thumbnails
+→ Find content gaps
+→ Save research
+→ Track competitors
+→ Receive alerts
+→ Generate strategy
+→ Create report
+→ Export data
+
+Everything in that workflow must actually work.
+
+---
+
+# 62. FIRST TASK
+
+Before writing application code:
+
+1. Inspect the existing repository.
+2. Create `/docs`.
+3. Create:
+
+AGENTS.md
+TODO.md
+ARCHITECTURE.md
+DATABASE.md
+API.md
+TESTING.md
+SECURITY.md
+DATA-SOURCES.md
+
+4. Build the project architecture.
+5. Create the database schema.
+6. Create the environment variable template.
+7. Create the authentication foundation.
+8. Create the UI design system.
+9. Create the initial dashboard shell.
+10. Update TODO.md.
+
+Then begin PHASE 1.
+
+After every major phase:
+
+* run tests
+* fix errors
+* verify real functionality
+* update documentation
+* update TODO.md
+* do not move forward with known broken core functionality.
+
+Start now.

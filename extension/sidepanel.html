@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CreatorPulse Panel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #090d16;
+      color: #f8fafc;
+      font-size: 13px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .logo {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 11px;
+      color: white;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      background: #e11d48;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      box-sizing: border-box;
+      margin-top: 8px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn:hover {
+      background: #be123c;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .stat-val {
+      color: #f8fafc;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">CP</div>
+    <div>
+      <div style="font-weight: 700; font-size: 14px;">CreatorPulse</div>
+      <div style="font-size: 11px; color: #94a3b8;">YouTube Intelligence Panel</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight: 600; margin-bottom: 4px;">Live Tab Telemetry</div>
+    <div class="stat-row">
+      <span>Status:</span>
+      <span class="stat-val" style="color: #10b981;">Connected</span>
+    </div>
+    <div class="stat-row">
+      <span>Active Surface:</span>
+      <span class="stat-val" id="activeSurface">YouTube</span>
+    </div>
+    <div class="stat-row">
+      <span>Overlay Active:</span>
+      <span class="stat-val">Yes (+Swipe Enabled)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight: 600; margin-bottom: 4px;">Creator Quick Launch</div>
+    <a href="http://localhost:3000/research/outliers" target="_blank" class="btn">Inspect Outliers</a>
+    <a href="http://localhost:3000/library/swipe" target="_blank" class="btn btn-secondary">Open Swipe File Library</a>
+    <a href="http://localhost:3000/content/titles" target="_blank" class="btn btn-secondary">Title & Hook Analyzer</a>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
