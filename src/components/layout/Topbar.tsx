@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bell,
   Search,
@@ -24,6 +24,18 @@ export function Topbar({
 }: TopbarProps) {
   const [locale, setLocale] = useState<"en" | "km">("en");
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
+  const [quotaUsed, setQuotaUsed] = useState<number>(0);
+
+  useEffect(() => {
+    fetch("/api/v1/youtube/quota")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setQuotaUsed(json.data.usedUnits);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <header className="h-16 border-b border-border bg-card/40 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
@@ -44,7 +56,7 @@ export function Topbar({
         >
           <Cpu className="w-3.5 h-3.5 text-primary" />
           <span>API Quota:</span>
-          <span className="font-semibold text-foreground">0 / 10,000 units</span>
+          <span className="font-semibold text-foreground">{quotaUsed} / 10,000 units</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
         </div>
 

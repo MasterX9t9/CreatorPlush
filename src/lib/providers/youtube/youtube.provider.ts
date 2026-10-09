@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import { AttributedMetric, MetricAttribution, OutlierAnalysis } from "@/lib/types";
 import { calculateExpectedViews, calculateOutlierScore } from "@/lib/algorithms/outliers";
+import { quotaCache, QuotaTracker } from "@/lib/cache/quota-cache";
 
 export interface YouTubeVideoItem {
   id: string;
@@ -78,6 +79,10 @@ export class YouTubeProvider {
     this.apiKey = apiKey || process.env.YOUTUBE_API_KEY || "";
   }
 
+  getQuotaStatus(): QuotaTracker {
+    return quotaCache.getQuota();
+  }
+
   private getClient() {
     if (!this.apiKey) {
       throw new Error(
@@ -91,7 +96,7 @@ export class YouTubeProvider {
   }
 
   /**
-   * Search videos and enrich with view counts and duration details
+   * Search videos with caching and quota tracking
    */
   async searchVideos(options: VideoSearchOptions): Promise<{
     items: YouTubeVideoItem[];
@@ -99,6 +104,19 @@ export class YouTubeProvider {
     totalResults?: number;
     attribution: MetricAttribution;
   }> {
+    const cacheKey = `search_v_${JSON.stringify(options)}`;
+    const cached = quotaCache.get<any>(cacheKey);
+
+    if (cached) {
+      return {
+        ...cached.value,
+        attribution: {
+          ...cached.value.attribution,
+          timestamp: cached.createdAt,
+        },
+      };
+    }
+
     const youtube = this.getClient();
     const nowIso = new Date().toISOString();
 
@@ -110,6 +128,9 @@ export class YouTubeProvider {
     };
 
     try {
+      // Record search quota: 100 units
+      quotaCache.recordQuota(100);
+
       // 1. Execute search query (costs 100 quota units)
       const searchRes = await youtube.search.list({
         part: ["snippet"],
@@ -128,13 +149,18 @@ export class YouTubeProvider {
         .filter((id): id is string => Boolean(id));
 
       if (videoIds.length === 0) {
-        return {
+        const emptyResult = {
           items: [],
           nextPageToken: searchRes.data.nextPageToken || undefined,
           totalResults: searchRes.data.pageInfo?.totalResults || 0,
           attribution,
         };
+        quotaCache.set(cacheKey, emptyResult, 3600, "youtube_data_api");
+        return emptyResult;
       }
+
+      // Record video details quota: 1 unit
+      quotaCache.recordQuota(1);
 
       // 2. Fetch full video statistics and duration (costs 1 quota unit for up to 50 videos)
       const videosRes = await youtube.videos.list({
@@ -173,12 +199,15 @@ export class YouTubeProvider {
         }
       );
 
-      return {
+      const searchResult = {
         items: videoItems,
         nextPageToken: searchRes.data.nextPageToken || undefined,
         totalResults: searchRes.data.pageInfo?.totalResults || videoItems.length,
         attribution,
       };
+
+      quotaCache.set(cacheKey, searchResult, 21600, "youtube_data_api");
+      return searchResult;
     } catch (error: any) {
       if (error?.code === 403 && error?.message?.includes("quota")) {
         throw new Error(
@@ -190,9 +219,21 @@ export class YouTubeProvider {
   }
 
   /**
-   * Fetch single channel details with official statistics
+   * Fetch single channel details with official statistics and caching
    */
   async getChannel(channelId: string): Promise<YouTubeChannelItem | null> {
+    const cacheKey = `channel_${channelId}`;
+    const cached = quotaCache.get<YouTubeChannelItem>(cacheKey);
+    if (cached) {
+      return {
+        ...cached.value,
+        attribution: {
+          ...cached.value.attribution,
+          timestamp: cached.createdAt,
+        },
+      };
+    }
+
     const youtube = this.getClient();
     const nowIso = new Date().toISOString();
 
@@ -204,6 +245,8 @@ export class YouTubeProvider {
     };
 
     try {
+      quotaCache.recordQuota(1);
+
       const res = await youtube.channels.list({
         part: ["snippet", "statistics", "brandingSettings"],
         id: [channelId],
@@ -217,7 +260,7 @@ export class YouTubeProvider {
       const videoCount = parseInt(item.statistics?.videoCount || "0", 10);
       const avgViews = videoCount > 0 ? Math.round(viewCount / videoCount) : 0;
 
-      return {
+      const channelItem: YouTubeChannelItem = {
         id: item.id || channelId,
         title: item.snippet?.title || "Unknown Channel",
         customUrl: item.snippet?.customUrl || undefined,
@@ -234,6 +277,9 @@ export class YouTubeProvider {
         avgViewsPerVideo: avgViews,
         attribution,
       };
+
+      quotaCache.set(cacheKey, channelItem, 43200, "youtube_data_api");
+      return channelItem;
     } catch (error: any) {
       if (error?.code === 403 && error?.message?.includes("quota")) {
         throw new Error("YOUTUBE_QUOTA_EXCEEDED: Daily YouTube quota exceeded.");
